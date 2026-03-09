@@ -21,7 +21,22 @@ export function useStrudel() {
     async function init() {
       try {
         await waitForGlobal('initStrudel')
-        const repl = await window.initStrudel()
+        const repl = await window.initStrudel({
+          prebake: () => Promise.all([
+            // Match strudel.cc default drum overrides (uzu-drumkit loaded after tdm).
+            window.samples?.(
+              'https://strudel.b-cdn.net/uzu-drumkit.json',
+              'https://strudel.b-cdn.net/uzu-drumkit/',
+              { prebake: true, tag: 'drum-machines' }
+            ),
+            // Keep `noise` token available for existing tunes.
+            window.samples?.(
+              { noise: ['noise/000_noise.wav'] },
+              'https://strudel.b-cdn.net/Dirt-Samples/',
+              { prebake: true }
+            ),
+          ]),
+        })
         if (cancelled) return
         replRef.current = repl
         setReady(true)
@@ -60,5 +75,18 @@ export function useStrudel() {
     try { if (window.setcps) window.setcps(cps) } catch { /* noop */ }
   }, [])
 
-  return { ready, initializing, error, play, stop, setCps }
+  const warmup = useCallback(async (selectors = []) => {
+    const r = replRef.current
+    if (!r || !Array.isArray(selectors) || !selectors.length) return
+    const list = [...new Set(selectors)].join(' ')
+    try {
+      if (typeof r.evaluate === 'function') {
+        await r.evaluate(`s("${list}").gain(0)`)
+        if (typeof r.stop === 'function') r.stop()
+        else if (typeof r.hush === 'function') r.hush()
+      }
+    } catch { /* noop */ }
+  }, [])
+
+  return { ready, initializing, error, play, stop, setCps, warmup }
 }

@@ -6,6 +6,24 @@ import './App.css'
 // ─────────────────────────────────── helpers
 function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)) }
 
+function extractSampleSelectors(code) {
+  const out = new Set()
+  const re = /\bs\((['"])([\s\S]*?)\1\)/g
+  let m
+  while ((m = re.exec(code))) {
+    const pat = m[2]
+    const tokRe = /\b([a-zA-Z][a-zA-Z0-9_-]*)(?::(\d+))?\b/g
+    let t
+    while ((t = tokRe.exec(pat))) {
+      const name = t[1]
+      const idx = t[2] ?? '0'
+      out.add(`${name}:${idx}`)
+    }
+  }
+  return [...out]
+}
+
+
 // ─────────────────────────────────── Reel SVG
 function Reel({ spin, size = 36 }) {
   return (
@@ -105,8 +123,8 @@ function Deck({ track, playing, paused, looping, cps, ready, onPlay, onPause, on
 
       {/* Brand strip */}
       <div className="deck-brand">
-        <span className="deck-brand-name">DIALTONE</span>
-        <span className="deck-brand-model">DT-01  ◆  CASSETTE DECK</span>
+        <span className="deck-brand-name">SYNTHREEL</span>
+        <span className="deck-brand-model">SR-01  ◆  CASSETTE DECK</span>
       </div>
 
       {/* Tape window */}
@@ -213,7 +231,7 @@ function Rack({ tracks, loadedId, playing, onLoad }) {
 
 // ─────────────────────────────────── App
 export default function App() {
-  const { ready, initializing, error, play, stop, setCps } = useStrudel()
+  const { ready, initializing, error, play, stop, setCps, warmup } = useStrudel()
 
   // Dynamic track list — reads manifest.json from the server, falls back to static
   const [tracks, setTracks] = useState(staticTracks)
@@ -229,6 +247,7 @@ export default function App() {
   const [looping,      setLooping]      = useState(true)
   const [cps,          setCpsState]     = useState(0.25)
   const [loadedCode,   setLoadedCode]   = useState(null)
+  const [loadedSamples, setLoadedSamples] = useState([])
   const [loading,      setLoading]      = useState(false)
   const [msg,          setMsg]          = useState(null)
 
@@ -242,12 +261,13 @@ export default function App() {
     if (!loadedCode || !ready) return
     setMsg(null)
     try {
+      await warmup(loadedSamples)
       await play(loadedCode)
       setDeckState('playing')
     } catch (e) {
       setMsg({ type: 'err', text: e.message })
     }
-  }, [loadedCode, ready, play])
+  }, [loadedCode, loadedSamples, ready, play, warmup])
 
   const handlePause = useCallback(() => {
     stop()
@@ -264,6 +284,7 @@ export default function App() {
     handleStop()
     setLoadedTrack(track)
     setLoadedCode(null)
+    setLoadedSamples([])
     setLoading(true)
     setMsg({ type: 'wait', text: `Loading ${track.title}…` })
     try {
@@ -271,7 +292,9 @@ export default function App() {
       if (!res.ok) throw new Error(`Cannot load ${track.file} (${res.status})`)
       let code = await res.text()
       code = code.replace(/^setcps\([^)]*\)\n?/m, '')   // tempo controlled by slider
+      const selectors = extractSampleSelectors(code)
       setLoadedCode(code)
+      setLoadedSamples(selectors)
       setMsg(null)
     } catch (e) {
       setMsg({ type: 'err', text: e.message })
@@ -293,8 +316,8 @@ export default function App() {
 
       <header className="app-hd">
         <div className="logo">
-          <span className="logo-icon">📼</span>
-          <span className="logo-name">DIALTONE</span>
+          <span className="logo-icon">�</span>
+          <span className="logo-name">SYNTHREEL</span>
         </div>
         <div className={`eng eng--${engineState}`}>
           <span className="eng-led" />
@@ -336,6 +359,8 @@ export default function App() {
       <footer className="app-ft">
         <span>Powered by <a href="https://strudel.cc" target="_blank" rel="noreferrer">Strudel</a></span>
         <span className="ft-dot">·</span>
+        <a href="https://github.com/dattaprasad-r-ekavade/BinaryRadio" target="_blank" rel="noreferrer">Source code</a>
+        <span className="ft-dot">·</span>
         <span>Pick a tape — press PLAY</span>
         <span className="ft-dot">·</span>
         <a href="https://buymeachai.ezee.li/datathecodie" target="_blank" rel="noreferrer" className="bmc">☕ Buy me a chai</a>
@@ -344,3 +369,4 @@ export default function App() {
     </div>
   )
 }
+

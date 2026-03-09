@@ -1,9 +1,9 @@
 {
-  "name": "strudel-tapes",
+  "name": "synthreel",
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "Retro cassette deck music player powered by Strudel live coding",
+  "description": "SynthReel — retro cassette deck music player powered by Strudel live coding",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

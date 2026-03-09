@@ -37,3 +37,10 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 - [React 18](https://react.dev) + [Vite 6](https://vitejs.dev)
 - [Strudel](https://strudel.cc) (`@strudel/web@1.3.0`) via CDN
 - Pure CSS (no UI framework)
+
+## License & Compliance
+
+- License: GNU AGPL-3.0-or-later (see [LICENSE](LICENSE))
+- Third-party notices: [NOTICE.md](NOTICE.md)
+- Compliance notes: [COMPLIANCE.md](COMPLIANCE.md)
+- Source code: https://github.com/dattaprasad-r-ekavade/BinaryRadio
