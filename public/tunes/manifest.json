@@ -1,0 +1,92 @@
+[
+  {
+    "id": "gentle-focus",
+    "title": "Gentle Focus",
+    "file": "/tunes/gentle-focus.md",
+    "color": "#162840",
+    "accent": "#4a88dd",
+    "emoji": "🌊",
+    "description": "Ambient waves for deep work"
+  },
+  {
+    "id": "midnight-drive",
+    "title": "Midnight Drive",
+    "file": "/tunes/midnight-drive.md",
+    "color": "#2a1440",
+    "accent": "#bb66ff",
+    "emoji": "🌃",
+    "description": "Synthwave cruise through the city"
+  },
+  {
+    "id": "rain-on-glass",
+    "title": "Rain on Glass",
+    "file": "/tunes/rain-on-glass.md",
+    "color": "#143030",
+    "accent": "#44bbbb",
+    "emoji": "🌧️",
+    "description": "Ambient meditation with rain textures"
+  },
+  {
+    "id": "neon-dreams",
+    "title": "Neon Dreams",
+    "file": "/tunes/neon-dreams.md",
+    "color": "#3a1020",
+    "accent": "#ff6688",
+    "emoji": "🕹️",
+    "description": "Chiptune lofi beats"
+  },
+  {
+    "id": "deep-ocean",
+    "title": "Deep Ocean",
+    "file": "/tunes/deep-ocean.md",
+    "color": "#0a1e2c",
+    "accent": "#3388bb",
+    "emoji": "🐋",
+    "description": "Abyssal ambient depths"
+  },
+  {
+    "id": "solar-wind",
+    "title": "Solar Wind",
+    "file": "/tunes/solar-wind.md",
+    "color": "#2a2008",
+    "accent": "#ddaa44",
+    "emoji": "☀️",
+    "description": "Cosmic ambient explorations"
+  },
+  {
+    "id": "campfire-tales",
+    "title": "Campfire Tales",
+    "file": "/tunes/campfire-tales.md",
+    "color": "#3b2317",
+    "accent": "#ff9a3c",
+    "emoji": "🔥",
+    "description": "Warm acoustic-style ambient by the fire"
+  },
+  {
+    "id": "monsoon",
+    "title": "Monsoon",
+    "file": "/tunes/monsoon.md",
+    "color": "#1a2f2f",
+    "accent": "#5fcfc6",
+    "emoji": "🌩️",
+    "description": "Raga-inspired ambient with rain-soaked textures"
+  },
+  {
+    "id": "rust-belt",
+    "title": "Rust Belt",
+    "file": "/tunes/rust-belt.md",
+    "color": "#2b1f24",
+    "accent": "#ff6f61",
+    "emoji": "🏭",
+    "description": "Industrial dub groove with heavy low end"
+  },
+  {
+    "id": "tokyo-subway",
+    "title": "Tokyo Subway",
+    "file": "/tunes/tokyo-subway.md",
+    "color": "#1a2135",
+    "accent": "#67b0ff",
+    "emoji": "🚇",
+    "description": "Glitchy neon pulse with urban late-night motion"
+  }
+]
