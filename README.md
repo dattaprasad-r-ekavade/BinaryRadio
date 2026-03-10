@@ -1,4 +1,4 @@
-# 📼 DialTone — Retro Cassette Music Deck
+# 📼 SynthReel — Retro Cassette Music Deck
 
 A browser-based retro cassette deck that plays generative music tracks written in [Strudel](https://strudel.cc) live-coding syntax.
 
@@ -37,6 +37,19 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 - [React 18](https://react.dev) + [Vite 6](https://vitejs.dev)
 - [Strudel](https://strudel.cc) (`@strudel/web@1.3.0`) via CDN
 - Pure CSS (no UI framework)
+
+## Future Improvements
+
+- **Visualizer** — add a real-time audio visualizer (waveform or spectrum) synced to the playing track
+- **Custom tune editor** — in-browser Strudel code editor so users can write and save their own tunes without touching the filesystem
+- **Track metadata** — display BPM, key, mood tags, and duration on the cassette label
+- **Favourites / playlist** — let users star tracks and queue them up for continuous playback
+- **Volume & EQ controls** — per-track gain knob and a simple bass/mid/treble equalizer
+- **Export to audio** — render a track to a .wav / .mp3 file directly in the browser using the Web Audio API
+- **PWA support** — make the app installable and playable offline via a service worker
+- **Keyboard shortcuts** — play/pause, next/prev track, tempo up/down without touching the mouse
+- **Dark / light theme toggle** — complement the retro aesthetic with a user-switchable palette
+- **Mobile-responsive layout** — optimise the cassette rack UI for small screens and touch input
 
 ## License & Compliance
 

@@ -6,7 +6,11 @@
     "color": "#162840",
     "accent": "#4a88dd",
     "emoji": "🌊",
-    "description": "Ambient waves for deep work"
+    "description": "Ambient waves for deep work",
+    "bpm": 84,
+    "key": "Am",
+    "moodTags": ["ambient", "focus"],
+    "durationSec": 330
   },
   {
     "id": "midnight-drive",
@@ -15,7 +19,11 @@
     "color": "#2a1440",
     "accent": "#bb66ff",
     "emoji": "🌃",
-    "description": "Synthwave cruise through the city"
+    "description": "Synthwave cruise through the city",
+    "bpm": 108,
+    "key": "Em",
+    "moodTags": ["synthwave", "night"],
+    "durationSec": 300
   },
   {
     "id": "rain-on-glass",
@@ -24,7 +32,11 @@
     "color": "#143030",
     "accent": "#44bbbb",
     "emoji": "🌧️",
-    "description": "Ambient meditation with rain textures"
+    "description": "Ambient meditation with rain textures",
+    "bpm": 76,
+    "key": "Dm",
+    "moodTags": ["rain", "meditative"],
+    "durationSec": 340
   },
   {
     "id": "neon-dreams",
@@ -33,7 +45,11 @@
     "color": "#3a1020",
     "accent": "#ff6688",
     "emoji": "🕹️",
-    "description": "Chiptune lofi beats"
+    "description": "Chiptune lofi beats",
+    "bpm": 112,
+    "key": "Cm",
+    "moodTags": ["chiptune", "lofi"],
+    "durationSec": 280
   },
   {
     "id": "deep-ocean",
@@ -42,7 +58,11 @@
     "color": "#0a1e2c",
     "accent": "#3388bb",
     "emoji": "🐋",
-    "description": "Abyssal ambient depths"
+    "description": "Abyssal ambient depths",
+    "bpm": 72,
+    "key": "Fm",
+    "moodTags": ["deep", "ambient"],
+    "durationSec": 360
   },
   {
     "id": "solar-wind",
@@ -51,7 +71,11 @@
     "color": "#2a2008",
     "accent": "#ddaa44",
     "emoji": "☀️",
-    "description": "Cosmic ambient explorations"
+    "description": "Cosmic ambient explorations",
+    "bpm": 98,
+    "key": "Gm",
+    "moodTags": ["cosmic", "ambient"],
+    "durationSec": 320
   },
   {
     "id": "campfire-tales",
@@ -60,7 +84,11 @@
     "color": "#3b2317",
     "accent": "#ff9a3c",
     "emoji": "🔥",
-    "description": "Warm acoustic-style ambient by the fire"
+    "description": "Warm acoustic-style ambient by the fire",
+    "bpm": 88,
+    "key": "C",
+    "moodTags": ["warm", "acoustic"],
+    "durationSec": 300
   },
   {
     "id": "monsoon",
@@ -69,7 +97,11 @@
     "color": "#1a2f2f",
     "accent": "#5fcfc6",
     "emoji": "🌩️",
-    "description": "Raga-inspired ambient with rain-soaked textures"
+    "description": "Raga-inspired ambient with rain-soaked textures",
+    "bpm": 92,
+    "key": "D",
+    "moodTags": ["rain", "raga"],
+    "durationSec": 315
   },
   {
     "id": "rust-belt",
@@ -78,7 +110,11 @@
     "color": "#2b1f24",
     "accent": "#ff6f61",
     "emoji": "🏭",
-    "description": "Industrial dub groove with heavy low end"
+    "description": "Industrial dub groove with heavy low end",
+    "bpm": 104,
+    "key": "Bm",
+    "moodTags": ["industrial", "dub"],
+    "durationSec": 295
   },
   {
     "id": "tokyo-subway",
@@ -87,6 +123,10 @@
     "color": "#1a2135",
     "accent": "#67b0ff",
     "emoji": "🚇",
-    "description": "Glitchy neon pulse with urban late-night motion"
+    "description": "Glitchy neon pulse with urban late-night motion",
+    "bpm": 118,
+    "key": "F#m",
+    "moodTags": ["glitch", "urban"],
+    "durationSec": 285
   }
 ]

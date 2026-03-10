@@ -4,17 +4,123 @@ function waitForGlobal(name, ms = 15000) {
   return new Promise((resolve, reject) => {
     const t0 = Date.now()
     const iv = setInterval(() => {
-      if (typeof window[name] === 'function') { clearInterval(iv); resolve() }
-      else if (Date.now() - t0 > ms) { clearInterval(iv); reject(new Error(name + ' timed out')) }
+      if (typeof window[name] === 'function') {
+        clearInterval(iv)
+        resolve()
+      } else if (Date.now() - t0 > ms) {
+        clearInterval(iv)
+        reject(new Error(name + ' timed out'))
+      }
     }, 80)
   })
+}
+
+function findContext(obj, seen = new Set(), depth = 0) {
+  if (!obj || depth > 4 || seen.has(obj)) return null
+  seen.add(obj)
+  if (typeof AudioContext !== 'undefined' && obj instanceof AudioContext) return obj
+  if (typeof OfflineAudioContext !== 'undefined' && obj instanceof OfflineAudioContext) return obj
+  if (typeof obj !== 'object') return null
+  for (const key of Object.keys(obj)) {
+    const value = obj[key]
+    if (!value || (typeof value !== 'object' && typeof value !== 'function')) continue
+    const found = findContext(value, seen, depth + 1)
+    if (found) return found
+  }
+  return null
+}
+
+function findAudioNode(obj, seen = new Set(), depth = 0) {
+  if (!obj || depth > 3 || seen.has(obj)) return null
+  seen.add(obj)
+  const isNode = typeof AudioNode !== 'undefined' && obj instanceof AudioNode
+  if (isNode && obj !== obj.context?.destination) return obj
+  if (typeof obj !== 'object') return null
+  for (const key of Object.keys(obj)) {
+    const value = obj[key]
+    if (!value || (typeof value !== 'object' && typeof value !== 'function')) continue
+    const found = findAudioNode(value, seen, depth + 1)
+    if (found) return found
+  }
+  return null
 }
 
 export function useStrudel() {
   const [ready, setReady] = useState(false)
   const [initializing, setInitializing] = useState(true)
   const [error, setError] = useState(null)
+  const [audioReady, setAudioReady] = useState(false)
   const replRef = useRef(null)
+  const audioRef = useRef({
+    ctx: null,
+    output: null,
+    gain: null,
+    bass: null,
+    mid: null,
+    treble: null,
+    analyser: null,
+    recDest: null,
+    mediaRecorder: null,
+    chunks: [],
+    wavProcessor: null,
+    wavBuffers: [],
+    wavSampleRate: 44100,
+    wired: false,
+  })
+
+  const wireAudio = useCallback((repl) => {
+    if (!repl || audioRef.current.wired) return
+    try {
+      const ctx = repl?.context || repl?.audioContext || repl?.scheduler?.context || findContext(repl) || null
+      if (!ctx?.createGain) return
+
+      const output = repl?.output || repl?.master || repl?.audio?.output || findAudioNode(repl)
+      if (!output?.connect || output === ctx.destination) return
+
+      const bass = ctx.createBiquadFilter()
+      bass.type = 'lowshelf'
+      bass.frequency.value = 250
+
+      const mid = ctx.createBiquadFilter()
+      mid.type = 'peaking'
+      mid.frequency.value = 1200
+      mid.Q.value = 1
+
+      const treble = ctx.createBiquadFilter()
+      treble.type = 'highshelf'
+      treble.frequency.value = 3200
+
+      const gain = ctx.createGain()
+      const analyser = ctx.createAnalyser()
+      analyser.fftSize = 2048
+      const recDest = ctx.createMediaStreamDestination()
+
+      output.disconnect()
+      output.connect(bass)
+      bass.connect(mid)
+      mid.connect(treble)
+      treble.connect(gain)
+      gain.connect(analyser)
+      analyser.connect(ctx.destination)
+      analyser.connect(recDest)
+
+      audioRef.current = {
+        ...audioRef.current,
+        ctx,
+        output,
+        bass,
+        mid,
+        treble,
+        gain,
+        analyser,
+        recDest,
+        wired: true,
+      }
+      setAudioReady(true)
+    } catch {
+      // Strudel internals vary across versions; keep UI usable when wiring fails.
+    }
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -23,22 +129,21 @@ export function useStrudel() {
         await waitForGlobal('initStrudel')
         const repl = await window.initStrudel({
           prebake: () => Promise.all([
-            // Match strudel.cc default drum overrides (uzu-drumkit loaded after tdm).
             window.samples?.(
               'https://strudel.b-cdn.net/uzu-drumkit.json',
               'https://strudel.b-cdn.net/uzu-drumkit/',
-              { prebake: true, tag: 'drum-machines' }
+              { prebake: true, tag: 'drum-machines' },
             ),
-            // Keep `noise` token available for existing tunes.
             window.samples?.(
               { noise: ['noise/000_noise.wav'] },
               'https://strudel.b-cdn.net/Dirt-Samples/',
-              { prebake: true }
+              { prebake: true },
             ),
           ]),
         })
         if (cancelled) return
         replRef.current = repl
+        wireAudio(repl)
         setReady(true)
       } catch (e) {
         if (!cancelled) setError(e.message)
@@ -47,10 +152,11 @@ export function useStrudel() {
       }
     }
     init()
-    return () => { cancelled = true }
-  }, [])
+    return () => {
+      cancelled = true
+    }
+  }, [wireAudio])
 
-  // Use the repl object directly — window globals can be stale or missing
   const play = useCallback(async (code) => {
     const r = replRef.current
     if (!r) throw new Error('Engine not ready')
@@ -71,8 +177,147 @@ export function useStrudel() {
       const r = replRef.current
       if (r?.scheduler?.setCps) r.scheduler.setCps(cps)
       else if (r?.setCps) r.setCps(cps)
-    } catch { /* noop */ }
-    try { if (window.setcps) window.setcps(cps) } catch { /* noop */ }
+    } catch {
+      // noop
+    }
+    try {
+      if (window.setcps) window.setcps(cps)
+    } catch {
+      // noop
+    }
+  }, [])
+
+  const setMasterVolume = useCallback((volume) => {
+    const g = audioRef.current.gain
+    if (!g) return false
+    g.gain.value = Math.max(0, Math.min(1.5, volume))
+    return true
+  }, [])
+
+  const setEq = useCallback((bass = 0, mid = 0, treble = 0) => {
+    if (!audioRef.current.bass || !audioRef.current.mid || !audioRef.current.treble) return false
+    audioRef.current.bass.gain.value = bass
+    audioRef.current.mid.gain.value = mid
+    audioRef.current.treble.gain.value = treble
+    return true
+  }, [])
+
+  const getAnalyser = useCallback(() => audioRef.current.analyser, [])
+
+  const startRecording = useCallback(() => {
+    const recDest = audioRef.current.recDest
+    if (!recDest || typeof MediaRecorder === 'undefined') return false
+    const mime = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+      ? 'audio/webm;codecs=opus'
+      : MediaRecorder.isTypeSupported('audio/ogg;codecs=opus')
+        ? 'audio/ogg;codecs=opus'
+        : ''
+    const recorder = new MediaRecorder(recDest.stream, mime ? { mimeType: mime } : undefined)
+    audioRef.current.chunks = []
+    recorder.ondataavailable = (e) => {
+      if (e.data.size > 0) audioRef.current.chunks.push(e.data)
+    }
+    recorder.start(250)
+    audioRef.current.mediaRecorder = recorder
+    return true
+  }, [])
+
+  const startWavCapture = useCallback(() => {
+    const { ctx, analyser } = audioRef.current
+    if (!ctx || !analyser || !ctx.createScriptProcessor) return false
+    if (audioRef.current.wavProcessor) return true
+    const processor = ctx.createScriptProcessor(4096, 2, 2)
+    audioRef.current.wavBuffers = []
+    audioRef.current.wavSampleRate = ctx.sampleRate || 44100
+    processor.onaudioprocess = (event) => {
+      const inL = event.inputBuffer.getChannelData(0)
+      const inR = event.inputBuffer.numberOfChannels > 1
+        ? event.inputBuffer.getChannelData(1)
+        : inL
+      audioRef.current.wavBuffers.push({
+        left: new Float32Array(inL),
+        right: new Float32Array(inR),
+      })
+    }
+    analyser.connect(processor)
+    processor.connect(ctx.destination)
+    audioRef.current.wavProcessor = processor
+    return true
+  }, [])
+
+  const stopWavCapture = useCallback(() => {
+    const processor = audioRef.current.wavProcessor
+    if (!processor) return null
+    processor.disconnect()
+    try {
+      audioRef.current.analyser?.disconnect(processor)
+    } catch {
+      // noop
+    }
+    audioRef.current.wavProcessor = null
+
+    const chunks = audioRef.current.wavBuffers
+    if (!chunks.length) return null
+    audioRef.current.wavBuffers = []
+
+    let total = 0
+    for (const c of chunks) total += c.left.length
+    const interleaved = new Float32Array(total * 2)
+    let offset = 0
+    for (const c of chunks) {
+      for (let i = 0; i < c.left.length; i += 1) {
+        interleaved[offset++] = c.left[i]
+        interleaved[offset++] = c.right[i]
+      }
+    }
+
+    const sampleRate = audioRef.current.wavSampleRate || 44100
+    const bytesPerSample = 2
+    const blockAlign = 2 * bytesPerSample
+    const byteRate = sampleRate * blockAlign
+    const dataSize = interleaved.length * bytesPerSample
+    const buffer = new ArrayBuffer(44 + dataSize)
+    const view = new DataView(buffer)
+
+    const writeString = (o, s) => {
+      for (let i = 0; i < s.length; i += 1) view.setUint8(o + i, s.charCodeAt(i))
+    }
+
+    writeString(0, 'RIFF')
+    view.setUint32(4, 36 + dataSize, true)
+    writeString(8, 'WAVE')
+    writeString(12, 'fmt ')
+    view.setUint32(16, 16, true)
+    view.setUint16(20, 1, true)
+    view.setUint16(22, 2, true)
+    view.setUint32(24, sampleRate, true)
+    view.setUint32(28, byteRate, true)
+    view.setUint16(32, blockAlign, true)
+    view.setUint16(34, 16, true)
+    writeString(36, 'data')
+    view.setUint32(40, dataSize, true)
+
+    let pos = 44
+    for (let i = 0; i < interleaved.length; i += 1) {
+      const s = Math.max(-1, Math.min(1, interleaved[i]))
+      view.setInt16(pos, s < 0 ? s * 0x8000 : s * 0x7fff, true)
+      pos += 2
+    }
+
+    return { blob: new Blob([buffer], { type: 'audio/wav' }), mimeType: 'audio/wav' }
+  }, [])
+
+  const stopRecording = useCallback(async () => {
+    const recorder = audioRef.current.mediaRecorder
+    if (!recorder) return null
+    return new Promise((resolve) => {
+      recorder.onstop = () => {
+        const blob = new Blob(audioRef.current.chunks, { type: recorder.mimeType || 'audio/webm' })
+        audioRef.current.mediaRecorder = null
+        resolve({ blob, mimeType: recorder.mimeType || 'audio/webm' })
+      }
+      recorder.stop()
+    })
   }, [])
 
   const warmup = useCallback(async (selectors = []) => {
@@ -85,8 +330,26 @@ export function useStrudel() {
         if (typeof r.stop === 'function') r.stop()
         else if (typeof r.hush === 'function') r.hush()
       }
-    } catch { /* noop */ }
+    } catch {
+      // noop
+    }
   }, [])
 
-  return { ready, initializing, error, play, stop, setCps, warmup }
+  return {
+    ready,
+    initializing,
+    error,
+    audioReady,
+    play,
+    stop,
+    setCps,
+    setMasterVolume,
+    setEq,
+    getAnalyser,
+    startRecording,
+    stopRecording,
+    startWavCapture,
+    stopWavCapture,
+    warmup,
+  }
 }

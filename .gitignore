@@ -3,3 +3,5 @@ dist/
 .specstory/
 *.local
 .vite/
+scripts/kokoro-v1.0.onnx
+scripts/voices-v1.0.bin
