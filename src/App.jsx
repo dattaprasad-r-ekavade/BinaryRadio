@@ -71,7 +71,7 @@ function arcSegment(cx, cy, r, startDeg, endDeg) {
   return `M ${sx.toFixed(2)} ${sy.toFixed(2)} A ${r} ${r} 0 ${large} 1 ${ex.toFixed(2)} ${ey.toFixed(2)}`
 }
 
-function Knob({ value, min = 0, max = 1, onChange, trackColor = '#00e87a', glowColor = 'rgba(0,232,122,.6)', dragTitle }) {
+function Knob({ value, min = 0, max = 1, onChange, trackColor = '#00e87a', glowColor = 'rgba(0,232,122,.6)', dragTitle, dragDirection = 1 }) {
   const startY = useRef(null)
   const startVal = useRef(null)
   const pct = (value - min) / (max - min)
@@ -91,7 +91,7 @@ function Knob({ value, min = 0, max = 1, onChange, trackColor = '#00e87a', glowC
   }
   const moveDrag = (clientY) => {
     const delta = (startY.current - clientY) / 260
-    const next = clamp(startVal.current + delta * (max - min), min, max)
+    const next = clamp(startVal.current + (delta * dragDirection) * (max - min), min, max)
     onChange(parseFloat(next.toFixed(2)))
   }
 
@@ -501,7 +501,7 @@ function Deck({
 
         <div className="deck-vol">
           <span className="vol-lbl">RJ VOL</span>
-          <Knob value={rjVolume} min={0} max={1} onChange={onRjVolume} trackColor="#ffa800" glowColor="rgba(255,168,0,.6)" dragTitle="RJ volume" />
+          <Knob value={rjVolume} min={0} max={1} onChange={onRjVolume} trackColor="#ffa800" glowColor="rgba(255,168,0,.6)" dragTitle="RJ volume" dragDirection={-1} />
           <span className="vol-val">{Math.round(rjVolume * 100)}<small>%</small></span>
         </div>
       </div>
@@ -671,12 +671,19 @@ export default function App() {
   }, [resolveTheme])
 
   useEffect(() => {
+    if (!audioReady) return
     setMasterVolume(masterVolume)
-  }, [masterVolume, setMasterVolume])
+  }, [audioReady, masterVolume, setMasterVolume])
 
   useEffect(() => {
     setEq(eq.bass, eq.mid, eq.treble)
   }, [eq, setEq])
+
+  const handleMasterVolume = useCallback((v) => {
+    const next = clamp(v, 0, 1.5)
+    setMasterVolumeState(next)
+    if (audioReady) setMasterVolume(next)
+  }, [audioReady, setMasterVolume, setMasterVolumeState])
 
   const handleStop = useCallback(() => {
     stop()
@@ -956,7 +963,7 @@ export default function App() {
         onVisualMode={setVisualMode}
         analyser={getAnalyser()}
         masterVolume={masterVolume}
-        onMasterVolume={setMasterVolumeState}
+        onMasterVolume={handleMasterVolume}
         eq={eq}
         onEq={setEqState}
         onExport={handleExport}

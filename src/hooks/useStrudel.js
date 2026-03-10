@@ -160,10 +160,12 @@ export function useStrudel() {
   const play = useCallback(async (code) => {
     const r = replRef.current
     if (!r) throw new Error('Engine not ready')
+    if (!audioRef.current.wired) wireAudio(r)
     if (typeof r.evaluate === 'function') await r.evaluate(code)
     else if (typeof window.evaluate === 'function') await window.evaluate(code)
     else throw new Error('Strudel evaluate not available')
-  }, [])
+    if (!audioRef.current.wired) wireAudio(r)
+  }, [wireAudio])
 
   const stop = useCallback(() => {
     const r = replRef.current
@@ -323,6 +325,7 @@ export function useStrudel() {
   const warmup = useCallback(async (selectors = []) => {
     const r = replRef.current
     if (!r || !Array.isArray(selectors) || !selectors.length) return
+    if (!audioRef.current.wired) wireAudio(r)
     const list = [...new Set(selectors)].join(' ')
     try {
       if (typeof r.evaluate === 'function') {
@@ -333,7 +336,8 @@ export function useStrudel() {
     } catch {
       // noop
     }
-  }, [])
+    if (!audioRef.current.wired) wireAudio(r)
+  }, [wireAudio])
 
   return {
     ready,
