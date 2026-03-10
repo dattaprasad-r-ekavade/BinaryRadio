@@ -1,59 +1,121 @@
-# 📼 SynthReel — Retro Cassette Music Deck
+# SynthReel
 
-A browser-based retro cassette deck that plays generative music tracks written in [Strudel](https://strudel.cc) live-coding syntax.
+[![CI](https://github.com/dattaprasad-r-ekavade/BinaryRadio/actions/workflows/ci.yml/badge.svg)](https://github.com/dattaprasad-r-ekavade/BinaryRadio/actions/workflows/ci.yml)
+[![License: AGPL-3.0-or-later](https://img.shields.io/badge/License-AGPL--3.0--or--later-blue.svg)](LICENSE)
+[![Node >=18](https://img.shields.io/badge/node-%3E%3D18-43853d.svg)](https://nodejs.org/)
 
-**[☕ Buy me a chai](https://buymeachai.ezee.li/datathecodie)**
+Retro cassette-deck web app for generative music using [Strudel](https://strudel.cc).
+
+## Preview
+
+![SynthReel cassette deck preview](docs/cassette-deck-preview.svg)
 
 ## Features
 
-- Cassette rack UI — pick and load any tape
-- Live tempo control (CPS / BPM)
-- Loop toggle
-- 6 built-in ambient / synthwave / chiptune tracks
-- Powered by [Strudel](https://strudel.cc) — runs entirely in the browser, no backend needed
+- Retro cassette deck interface with tape rack
+- Track load/play/pause/stop/loop controls
+- Radio mode with timed transitions
+- Pre-generated RJ announcement playback (`public/rj/*.mp3`)
+- Master volume + RJ volume + EQ strip
+- Spectrum/waveform visualizer and VU meters
+- Queue management and favorites
+- In-browser tune editor
+- WAV export
+- Theme persistence and keyboard shortcuts
+- Runtime tune loading from `public/tunes/manifest.json` with static seed fallback
 
-## Running locally
+## Quick Start
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open http://localhost:5173
+App runs at `http://localhost:5173`.
 
-## Building for production
+## Scripts
+
+- `npm run dev` - run local dev server
+- `npm run build` - production build
+- `npm run preview` - preview built app
+- `npm run test` - run unit/integration tests (Vitest)
+- `npm run lint` - lint source files
+- `npm run format` - apply Prettier formatting to `src/`
+- `npm run generate-rj` - generate RJ announcement MP3 files
+
+### RJ Generation
+
+Prerequisite: a reachable Kokoro TTS server exposing OpenAI-compatible speech API.
 
 ```bash
-npm run build
-# output is in dist/
+npm run generate-rj
+node scripts/generate-rj.mjs --force
+node scripts/generate-rj.mjs --dry-run
 ```
 
-## Adding your own tunes
+If `public/rj` files are missing, radio mode skips announcements and continues playback.
 
-See [CONTRIBUTING.md](CONTRIBUTING.md).
+## Keyboard Shortcuts
 
-## Tech stack
+| Key | Action |
+| --- | --- |
+| `Space` | Play / Pause |
+| `S` | Stop |
+| `N` | Next track |
+| `P` | Previous track |
+| `L` | Toggle loop |
+| `+` / `=` | Increase tempo |
+| `-` | Decrease tempo |
+| `T` | Toggle light/dark theme |
+| `H` | Toggle shortcuts help |
 
-- [React 18](https://react.dev) + [Vite 6](https://vitejs.dev)
-- [Strudel](https://strudel.cc) (`@strudel/web@1.3.0`) via CDN
-- Pure CSS (no UI framework)
+## Architecture
 
-## Future Improvements
+```text
+src/
+  App.jsx                 # app orchestration and UI composition
+  App.css                 # UI styling
+  hooks/
+    useStrudel.js         # Strudel bootstrap + audio graph wiring + export
+    useRadioMode.js       # radio scheduling + RJ transitions
+    useLocalStorage.js    # persistence helper
+    useKeyboardShortcuts.js
+  data/
+    tracks.js             # static seed tracks fallback
+  utils/
+    playlist.js           # queue and favorites helpers
+  rj/
+    playAnnouncement.js   # RJ transition audio loader/player
+public/
+  tunes/manifest.json     # runtime tune index
+  tunes/*.md              # tune source files
+  rj/*.mp3                # pre-generated RJ clips
+scripts/
+  generate-rj.mjs         # RJ clip generator
+  kokoro_server.py        # optional local helper server
+```
 
-- **Visualizer** — add a real-time audio visualizer (waveform or spectrum) synced to the playing track
-- **Custom tune editor** — in-browser Strudel code editor so users can write and save their own tunes without touching the filesystem
-- **Track metadata** — display BPM, key, mood tags, and duration on the cassette label
-- **Favourites / playlist** — let users star tracks and queue them up for continuous playback
-- **Volume & EQ controls** — per-track gain knob and a simple bass/mid/treble equalizer
-- **Export to audio** — render a track to a .wav / .mp3 file directly in the browser using the Web Audio API
-- **PWA support** — make the app installable and playable offline via a service worker
-- **Keyboard shortcuts** — play/pause, next/prev track, tempo up/down without touching the mouse
-- **Dark / light theme toggle** — complement the retro aesthetic with a user-switchable palette
-- **Mobile-responsive layout** — optimise the cassette rack UI for small screens and touch input
+## Known Issues
 
-## License & Compliance
+- Strudel SharedWorker clockworker can fail in some CDN/browser combos.
+- Workaround: `window.SharedWorker = undefined` is set in `index.html` before loading Strudel.
+- Reference discussion: https://github.com/tidalcycles/strudel/pull/1129
 
-- License: GNU AGPL-3.0-or-later (see [LICENSE](LICENSE))
-- Third-party notices: [NOTICE.md](NOTICE.md)
-- Compliance notes: [COMPLIANCE.md](COMPLIANCE.md)
-- Source code: https://github.com/dattaprasad-r-ekavade/BinaryRadio
+## Governance and Community
+
+- Contributing guide: [CONTRIBUTING.md](CONTRIBUTING.md)
+- Code of conduct: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+- Security policy: [SECURITY.md](SECURITY.md)
+- Changelog: [CHANGELOG.md](CHANGELOG.md)
+- License: [LICENSE](LICENSE)
+
+## Project Metadata
+
+- Node: `>=18` (recommended via `.nvmrc` = `20`)
+- License: `AGPL-3.0-or-later`
+- Package visibility: this repo is intentionally `"private": true` in `package.json`.
+  Distribution is source-first via GitHub rather than npm publishing.
+
+## Repository
+
+Source: https://github.com/dattaprasad-r-ekavade/BinaryRadio

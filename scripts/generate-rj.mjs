@@ -10,6 +10,7 @@
  * Usage:
  *   node scripts/generate-rj.mjs
  *   node scripts/generate-rj.mjs --force   # overwrite existing files
+ *   node scripts/generate-rj.mjs --dry-run # print intended operations only
  *
  * Output: public/rj/*.mp3
  */
@@ -24,6 +25,7 @@ const KOKORO_URL = process.env.KOKORO_URL  || 'http://localhost:8880'
 const VOICE      = process.env.KOKORO_VOICE || 'af_nicole'  // smooth, calm American female
 const OUT_DIR    = join(__dirname, '../public/rj')
 const FORCE      = process.argv.includes('--force')
+const DRY_RUN    = process.argv.includes('--dry-run')
 
 const manifest = JSON.parse(
   readFileSync(join(__dirname, '../public/tunes/manifest.json'), 'utf-8')
@@ -43,6 +45,10 @@ function buildScript(current, next, idx) {
 async function generateAudio(text, outputPath) {
   if (!FORCE && existsSync(outputPath)) {
     console.log(`  skip (exists) ${outputPath}`)
+    return
+  }
+  if (DRY_RUN) {
+    console.log(`  dry-run ${outputPath}`)
     return
   }
   const res = await fetch(`${KOKORO_URL}/v1/audio/speech`, {
@@ -69,6 +75,9 @@ async function main() {
   console.log(`   Kokoro URL : ${KOKORO_URL}`)
   console.log(`   Voice      : ${VOICE}`)
   console.log(`   Output     : ${OUT_DIR}\n`)
+  if (DRY_RUN) {
+    console.log('   Mode       : dry-run (no requests, no files written)\n')
+  }
 
   mkdirSync(OUT_DIR, { recursive: true })
 
