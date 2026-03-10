@@ -3,5 +3,7 @@ dist/
 .specstory/
 *.local
 .vite/
+playwright-report/
+test-results/
 scripts/kokoro-v1.0.onnx
 scripts/voices-v1.0.bin

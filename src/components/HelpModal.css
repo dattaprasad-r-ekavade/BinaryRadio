@@ -1,0 +1,7 @@
+.shortcuts {
+  border: 1px solid var(--border);
+  background: var(--bg2);
+  border-radius: var(--r);
+  padding: 8px 12px;
+  font-size: 0.66rem;
+}

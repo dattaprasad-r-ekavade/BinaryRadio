@@ -1,0 +1,64 @@
+.queue-panel {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 10px;
+}
+
+.queue-hd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  color: var(--dim);
+}
+
+.queue-clear {
+  font-size: 0.55rem;
+  padding: 4px 6px;
+  border: 1px solid var(--border);
+  background: var(--bg3);
+  color: var(--text);
+  border-radius: 4px;
+}
+
+.queue-empty {
+  font-size: 0.64rem;
+  color: var(--dimmer);
+}
+
+.queue-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 0;
+  border-top: 1px dashed var(--border);
+}
+
+.queue-title {
+  font-size: 0.65rem;
+}
+
+.queue-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.queue-actions button {
+  font-size: 0.58rem;
+  padding: 3px 6px;
+  border: 1px solid var(--border);
+  background: var(--bg3);
+  color: var(--text);
+  border-radius: 4px;
+}
+
+@media (max-width: 600px) {
+  .queue-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

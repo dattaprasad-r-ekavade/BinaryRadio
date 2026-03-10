@@ -1,0 +1,54 @@
+.vu {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.vu-ch {
+  font-size: 0.52rem;
+  color: var(--dimmer);
+  width: 10px;
+  flex-shrink: 0;
+}
+
+.vu-bars {
+  display: flex;
+  gap: 2px;
+  flex: 1;
+  height: 7px;
+}
+
+.vu-b {
+  flex: 1;
+  height: 7px;
+  border-radius: 1px;
+  background: var(--bg4);
+}
+
+.vu-b--on {
+  animation: vuf calc(0.1s + var(--i) * 0.016s) ease-in-out infinite alternate;
+}
+
+.vu-b--on:nth-child(-n + 12) {
+  background: var(--green);
+  box-shadow: 0 0 3px var(--green2);
+}
+
+.vu-b--on:nth-child(n + 13):nth-child(-n + 16) {
+  background: var(--amber);
+  box-shadow: 0 0 3px var(--amber);
+}
+
+.vu-b--on:nth-child(n + 17) {
+  background: var(--red);
+  box-shadow: 0 0 3px var(--red);
+}
+
+@keyframes vuf {
+  from {
+    opacity: calc(0.1 + var(--i) * 0.04);
+  }
+  to {
+    opacity: 1;
+  }
+}

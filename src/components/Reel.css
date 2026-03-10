@@ -1,0 +1,13 @@
+.reel {
+  flex-shrink: 0;
+}
+
+.reel--spin {
+  animation: spin-reel 2s linear infinite;
+}
+
+@keyframes spin-reel {
+  to {
+    transform: rotate(360deg);
+  }
+}

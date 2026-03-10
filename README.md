@@ -6,9 +6,13 @@
 
 Retro cassette-deck web app for generative music using [Strudel](https://strudel.cc).
 
+Live demo: https://dattaprasad-r-ekavade.github.io/BinaryRadio/
+
 ## Preview
 
-![SynthReel cassette deck preview](docs/cassette-deck-preview.svg)
+<img src="docs/cassette-deck-preview.svg" alt="SynthReel cassette deck preview" loading="lazy" />
+
+<img src="docs/demo-30s.gif" alt="SynthReel 30 second demo" loading="lazy" />
 
 ## Features
 
@@ -39,6 +43,7 @@ App runs at `http://localhost:5173`.
 - `npm run build` - production build
 - `npm run preview` - preview built app
 - `npm run test` - run unit/integration tests (Vitest)
+- `npm run test:e2e` - run browser E2E tests (Playwright)
 - `npm run lint` - lint source files
 - `npm run format` - apply Prettier formatting to `src/`
 - `npm run generate-rj` - generate RJ announcement MP3 files
@@ -74,7 +79,7 @@ If `public/rj` files are missing, radio mode skips announcements and continues p
 ```text
 src/
   App.jsx                 # app orchestration and UI composition
-  App.css                 # UI styling
+  App.css                 # style entrypoint (imports variables + app shell styles)
   hooks/
     useStrudel.js         # Strudel bootstrap + audio graph wiring + export
     useRadioMode.js       # radio scheduling + RJ transitions
@@ -100,6 +105,7 @@ scripts/
 - Strudel SharedWorker clockworker can fail in some CDN/browser combos.
 - Workaround: `window.SharedWorker = undefined` is set in `index.html` before loading Strudel.
 - Reference discussion: https://github.com/tidalcycles/strudel/pull/1129
+- WebKit/Safari engine initialization may fail for Strudel in some environments (`ENGINE ERROR`).
 
 ## Governance and Community
 
@@ -107,6 +113,7 @@ scripts/
 - Code of conduct: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
 - Security policy: [SECURITY.md](SECURITY.md)
 - Changelog: [CHANGELOG.md](CHANGELOG.md)
+- Manual QA log: [MANUAL_QA.md](MANUAL_QA.md)
 - License: [LICENSE](LICENSE)
 
 ## Project Metadata

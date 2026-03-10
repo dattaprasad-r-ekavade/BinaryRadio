@@ -1,0 +1,12 @@
+.knob-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: ns-resize;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  border-radius: 50%;
+  padding: 4px;
+}
