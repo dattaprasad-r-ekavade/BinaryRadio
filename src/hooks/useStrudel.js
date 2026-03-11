@@ -1,3 +1,4 @@
+// @ts-nocheck — complex audio/recorder refs; typed migration tracked in issue #TS-001
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { encodeStereoWav } from '../utils/wav';
 

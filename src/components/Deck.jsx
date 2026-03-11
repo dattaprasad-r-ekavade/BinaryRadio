@@ -53,7 +53,7 @@ function MetadataPills({ track }) {
       <span>{track.bpm} BPM</span>
       <span>{track.key}</span>
       <span>{formatDuration(track.durationSec)}</span>
-      <span>{track.moodTags?.join(' Â· ')}</span>
+      <span>{track.moodTags?.join(' · ')}</span>
     </div>
   )
 }
@@ -110,7 +110,7 @@ export default function Deck({
     <div className="deck">
       <div className="deck-brand">
         <span className="deck-brand-name">SYNTHREEL</span>
-        <span className="deck-brand-model">SR-01 â—† CASSETTE DECK</span>
+        <span className="deck-brand-model">SR-01 ◆ CASSETTE DECK</span>
       </div>
 
       <div className="deck-vizwrap">
@@ -144,13 +144,13 @@ export default function Deck({
             </>
           ) : (
             <>
-              <div className="deck-eject-ico">â</div>
+              <div className="deck-eject-ico">⏏</div>
               <div className="deck-idle">NO TAPE</div>
               <div className="deck-idle-sub">pick a cassette below</div>
             </>
           )}
           <div className={`deck-state deck-state--${state}`}>
-            {state === 'playing' ? 'â— REC' : state === 'paused' ? 'â¸ PAUSED' : 'â–  STOPPED'}
+            {state === 'playing' ? '● REC' : state === 'paused' ? '⏸ PAUSED' : '■ STOPPED'}
           </div>
           <div className="deck-radio-row">
             <button
@@ -162,7 +162,7 @@ export default function Deck({
             </button>
             {radioEnabled && (
               <span className="radio-status">
-                {radioPhase === 'announcing' ? 'DJ' : 'Music'} â€¢ {Math.max(0, radioTimeLeft)}s
+                {radioPhase === 'announcing' ? 'DJ' : 'Music'} • {Math.max(0, radioTimeLeft)}s
               </span>
             )}
           </div>
@@ -177,15 +177,15 @@ export default function Deck({
 
       <div className="deck-transport">
         <TBtn
-          icon="â– "
+          icon="■"
           label="STOP"
           onClick={onStop}
           active={!loaded ? false : state === 'stopped'}
           disabled={!loaded}
         />
-        <TBtn icon="â—€â—€" label="REW" onClick={onStop} disabled={!loaded} hidden />
+        <TBtn icon="◀◀" label="REW" onClick={onStop} disabled={!loaded} hidden />
         <TBtn
-          icon={playing ? 'â¸' : 'â–¶'}
+          icon={playing ? '⏸' : '▶'}
           label={playing ? 'PAUSE' : 'PLAY'}
           onClick={playing ? onPause : onPlay}
           active={playing}
@@ -193,9 +193,9 @@ export default function Deck({
           disabled={!loaded || !ready}
           variant="play"
         />
-        <TBtn icon="âŸ³" label="LOOP" onClick={onLoop} active={looping} variant="loop" />
+        <TBtn icon="⟳" label="LOOP" onClick={onLoop} active={looping} variant="loop" />
         <TBtn
-          icon={exporting ? 'â³' : 'â¬‡'}
+          icon={exporting ? '⏳' : '⬇'}
           label={exporting ? 'EXPORTING' : 'EXPORT'}
           onClick={onExport}
           disabled={!loaded || exporting}

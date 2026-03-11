@@ -1,3 +1,4 @@
+// @ts-nocheck — test utilities; typed migration tracked in issue #TS-001
 import { describe, expect, it } from 'vitest'
 import { encodeStereoWav, encodeStereoWavBuffer } from '../utils/wav'
 

@@ -2,19 +2,13 @@ import { useCallback, useEffect, useMemo, useReducer } from 'react'
 import { useStrudel } from './useStrudel'
 import { useRadioMode } from './useRadioMode'
 import { useKeyboardShortcuts } from './useKeyboardShortcuts'
-import { normalizeTrack, preparePlaybackCode } from '../utils/tunePipeline'
+import { useDraftTune } from './useDraftTune'
+import { useWavExport } from './useWavExport'
+import { usePwaInstall } from './usePwaInstall'
+import { preparePlaybackCode } from '../utils/tunePipeline'
 
 function clamp(v, lo, hi) {
   return Math.max(lo, Math.min(hi, v))
-}
-
-function downloadBlob(blob, name) {
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = name
-  a.click()
-  setTimeout(() => URL.revokeObjectURL(url), 500)
 }
 
 const initialState = {
@@ -28,19 +22,8 @@ const initialState = {
   msg: null,
   rjVolume: 0.6,
   visualMode: 'spectrum',
-  exporting: false,
   showEditor: false,
   showShortcuts: false,
-  installPromptEvent: null,
-  draftTune: {
-    title: 'My Tune',
-    description: 'Custom browser tune',
-    key: 'Am',
-    bpm: 96,
-    durationSec: 180,
-    moodTags: 'custom,ambient',
-    code: 'setcps(0.25)\nstack([\n  note("c3 e3 g3").slow(2).s("triangle"),\n  s("bd sn").slow(2).gain(0.8)\n])',
-  },
 }
 
 function reducer(state, action) {
@@ -114,6 +97,8 @@ export function useTransport({
 
   const setMsg = useCallback((v) => setField('msg', v), [setField])
 
+  const pwaInstall = usePwaInstall({ setMsg })
+
   const handleMasterVolume = useCallback(
     (v) => {
       const next = clamp(v, 0, 1.5)
@@ -143,7 +128,7 @@ export function useTransport({
       await play(state.loadedCode)
       patch({ deckState: 'playing' })
     } catch (e) {
-      setMsg({ type: 'err', text: e.message })
+      setMsg({ type: 'err', text: e instanceof Error ? e.message : String(e) })
     }
   }, [patch, play, ready, setMsg, state.loadedCode, state.loadedSamples, warmup])
 
@@ -179,7 +164,7 @@ export function useTransport({
         await play(code)
         patch({ deckState: 'playing' })
       } catch (e) {
-        setMsg({ type: 'err', text: e.message })
+        setMsg({ type: 'err', text: e instanceof Error ? e.message : String(e) })
       } finally {
         patch({ loading: false })
       }
@@ -202,13 +187,22 @@ export function useTransport({
         const { code, selectors } = preparePlaybackCode(rawCode)
         patch({ loadedCode: code, loadedSamples: selectors, msg: null })
       } catch (e) {
-        setMsg({ type: 'err', text: e.message })
+        setMsg({ type: 'err', text: e instanceof Error ? e.message : String(e) })
       } finally {
         patch({ loading: false })
       }
     },
     [handleStop, loadTrackCode, patch, setMsg],
   )
+
+  const drafts = useDraftTune({ handleLoadAndPlay, setCustomTunes, setMsg })
+
+  const wavExport = useWavExport({
+    startWavCapture,
+    stopWavCapture,
+    loadedTrack: state.loadedTrack,
+    setMsg,
+  })
 
   const radio = useRadioMode({ tracks, onLoadAndPlay: handleLoadAndPlay, onStop: handleStop, rjVolume: state.rjVolume })
 
@@ -239,28 +233,7 @@ export function useTransport({
     return () => clearTimeout(t)
   }, [handleLoadAndPlay, playNextFromQueue, queueIds.length, radio.enabled, state.deckState, state.loadedTrack?.durationSec, state.looping])
 
-  const handleExport = useCallback(async () => {
-    if (state.exporting) {
-      const result = stopWavCapture()
-      patch({ exporting: false })
-      if (!result?.blob) {
-        setMsg({ type: 'err', text: 'No export audio captured.' })
-        return
-      }
-      const stem = (state.loadedTrack?.title || 'track').toLowerCase().replace(/[^a-z0-9]+/g, '-')
-      downloadBlob(result.blob, `${stem || 'synthreel-track'}.wav`)
-      setMsg({ type: 'wait', text: 'Export complete: WAV downloaded.' })
-      return
-    }
-
-    const ok = startWavCapture()
-    if (!ok) {
-      setMsg({ type: 'err', text: 'Audio export unavailable in this browser/session.' })
-      return
-    }
-    patch({ exporting: true })
-    setMsg({ type: 'wait', text: 'Recording export started. Click Export WAV again to stop.' })
-  }, [patch, setMsg, startWavCapture, state.exporting, state.loadedTrack?.title, stopWavCapture])
+  const handleExport = wavExport.exportWav
 
   const playRelativeTrack = useCallback(
     (delta) => {
@@ -304,77 +277,6 @@ export function useTransport({
   )
   useKeyboardShortcuts(shortcuts)
 
-  useEffect(() => {
-    const onBeforeInstallPrompt = (event) => {
-      event.preventDefault()
-      patch({ installPromptEvent: event })
-    }
-    const onInstalled = () => {
-      patch({ installPromptEvent: null })
-      setMsg({ type: 'wait', text: 'SynthReel installed successfully.' })
-    }
-    window.addEventListener('beforeinstallprompt', onBeforeInstallPrompt)
-    window.addEventListener('appinstalled', onInstalled)
-    return () => {
-      window.removeEventListener('beforeinstallprompt', onBeforeInstallPrompt)
-      window.removeEventListener('appinstalled', onInstalled)
-    }
-  }, [patch, setMsg])
-
-  const saveDraftTune = useCallback(() => {
-    if (!state.draftTune.code.trim()) {
-      setMsg({ type: 'err', text: 'Tune code cannot be empty.' })
-      return
-    }
-    const id = `custom-${Date.now()}`
-    const item = normalizeTrack({
-      id,
-      title: state.draftTune.title,
-      description: state.draftTune.description,
-      code: state.draftTune.code,
-      custom: true,
-      key: state.draftTune.key,
-      bpm: state.draftTune.bpm,
-      durationSec: state.draftTune.durationSec,
-      moodTags: state.draftTune.moodTags.split(',').map((s) => s.trim()).filter(Boolean),
-      color: '#1d274a',
-      accent: '#7ab2ff',
-      emoji: '🧪',
-    })
-    setCustomTunes((prev) => [...prev, item])
-    setMsg({ type: 'wait', text: `Saved custom tune: ${item.title}` })
-  }, [setCustomTunes, setMsg, state.draftTune])
-
-  const playDraftTune = useCallback(async () => {
-    const track = normalizeTrack({
-      id: '__draft__',
-      title: state.draftTune.title || 'Draft Tune',
-      description: state.draftTune.description || 'Unsaved draft',
-      key: state.draftTune.key,
-      bpm: state.draftTune.bpm,
-      durationSec: state.draftTune.durationSec,
-      moodTags: state.draftTune.moodTags.split(',').map((s) => s.trim()).filter(Boolean),
-      code: state.draftTune.code,
-      custom: true,
-      color: '#1f2f35',
-      accent: '#4ad9bd',
-      emoji: '📝',
-    })
-    await handleLoadAndPlay(track)
-  }, [handleLoadAndPlay, state.draftTune])
-
-  const handleInstall = useCallback(async () => {
-    if (!state.installPromptEvent) return
-    try {
-      await state.installPromptEvent.prompt()
-      await state.installPromptEvent.userChoice
-    } catch {
-      // noop
-    } finally {
-      patch({ installPromptEvent: null })
-    }
-  }, [patch, state.installPromptEvent])
-
   const handleRadioToggle = useCallback(() => {
     const idx = Math.max(0, state.loadedTrack ? tracks.findIndex((t) => t.id === state.loadedTrack.id) : 0)
     radio.toggle(idx)
@@ -387,7 +289,12 @@ export function useTransport({
     ready,
     audioReady,
     analyser: getAnalyser(),
-    state,
+    state: {
+      ...state,
+      draftTune: drafts.draftTune,
+      exporting: wavExport.exporting,
+      installPromptEvent: pwaInstall.installPromptEvent,
+    },
     radio,
     engineState,
     engineLabel,
@@ -405,10 +312,10 @@ export function useTransport({
       radioToggle: handleRadioToggle,
       setShowEditor: (v) => setField('showEditor', v),
       setShowShortcuts: (v) => setField('showShortcuts', v),
-      install: handleInstall,
-      setDraftTune: (v) => setField('draftTune', v),
-      saveDraftTune,
-      playDraftTune,
+      install: pwaInstall.handleInstall,
+      setDraftTune: drafts.setDraftTune,
+      saveDraftTune: drafts.saveDraftTune,
+      playDraftTune: drafts.playDraftTune,
       setEq: setEqState,
       toggleTheme: () => {
         setTheme((v) => {

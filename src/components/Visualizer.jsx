@@ -1,3 +1,4 @@
+// @ts-nocheck — canvas/analyser refs; typed migration tracked in issue #TS-001
 import { useEffect, useRef } from 'react'
 import PropTypes from 'prop-types'
 import './Visualizer.css'

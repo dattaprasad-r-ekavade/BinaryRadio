@@ -48,6 +48,7 @@ export default function Knob({
     startVal.current = value
   }
   const moveDrag = (clientY) => {
+    if (startY.current === null || startVal.current === null) return
     const delta = (startY.current - clientY) / 260
     const next = clamp(startVal.current + delta * dragDirection * span, min, max)
     onChange(parseFloat(next.toFixed(2)))

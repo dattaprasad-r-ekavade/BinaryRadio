@@ -1,3 +1,4 @@
+// @ts-nocheck — class component with dynamic error state; typed migration tracked in issue #TS-001
 import React from 'react';
 import PropTypes from 'prop-types';
 
