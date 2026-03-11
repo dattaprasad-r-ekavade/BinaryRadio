@@ -100,7 +100,6 @@ export default function Deck({
   onEq,
   onExport,
   exporting,
-  audioReady,
 }) {
   const bpm = Math.round(cps * 60 * 4)
   const loaded = !!track
@@ -153,11 +152,7 @@ export default function Deck({
             {state === 'playing' ? '● REC' : state === 'paused' ? '⏸ PAUSED' : '■ STOPPED'}
           </div>
           <div className="deck-radio-row">
-            <button
-              className={radioEnabled ? 'mini-btn mini-btn--on' : 'mini-btn'}
-              onClick={onRadioToggle}
-              disabled={!audioReady}
-            >
+            <button className={radioEnabled ? 'mini-btn mini-btn--on' : 'mini-btn'} onClick={onRadioToggle} disabled={!ready}>
               RJ Radio
             </button>
             {radioEnabled && (
@@ -320,5 +315,4 @@ Deck.propTypes = {
   onEq: PropTypes.func.isRequired,
   onExport: PropTypes.func.isRequired,
   exporting: PropTypes.bool.isRequired,
-  audioReady: PropTypes.bool.isRequired,
 }

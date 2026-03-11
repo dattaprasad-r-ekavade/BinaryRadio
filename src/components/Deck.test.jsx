@@ -52,5 +52,10 @@ describe('Deck', () => {
     fireEvent.click(pauseBtn)
     expect(baseProps.onPause).toHaveBeenCalled()
   })
-})
 
+  it('keeps RJ radio toggle enabled when engine is ready even if audio graph is not ready', () => {
+    render(<Deck {...baseProps} audioReady={false} ready />)
+    const radioButtons = screen.getAllByRole('button', { name: /rj radio/i })
+    expect(radioButtons[radioButtons.length - 1]).toBeEnabled()
+  })
+})
