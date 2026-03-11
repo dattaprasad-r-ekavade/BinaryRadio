@@ -1,4 +1,5 @@
-const CACHE_NAME = 'synthreel-v1'
+const CACHE_VERSION = new URL(self.location.href).searchParams.get('cache') || 'synthreel-dev'
+const CACHE_NAME = CACHE_VERSION
 const CORE_ASSETS = [
   '/',
   '/index.html',

@@ -11,11 +11,12 @@
     "test:e2e": "playwright test --project=chromium",
     "typecheck": "tsc --noEmit",
     "demo:gif": "node scripts/generate-demo-gif.mjs",
-    "qa:matrix": "playwright test --project=chromium --project=firefox --project=webkit --project=\"mobile-chrome\"",
+    "qa:matrix": "playwright test --workers=1 --project=chromium --project=firefox --project=webkit --project=\"mobile-chrome\" --project=\"mobile-chrome-375\" --project=\"mobile-chrome-360\" --project=\"mobile-safari-se\"",
     "preview": "vite preview",
     "generate-rj": "node scripts/generate-rj.mjs",
     "lint": "eslint src/",
-    "format": "prettier --write src/"
+    "format": "prettier --write src/",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "prop-types": "^15.8.1",
@@ -31,6 +32,7 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^4.3.4",
+    "@vitest/coverage-v8": "^2.1.9",
     "eslint": "^9.39.4",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",

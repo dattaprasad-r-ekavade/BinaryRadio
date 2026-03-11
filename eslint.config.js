@@ -16,6 +16,7 @@ export default [
       globals: {
         ...globals.browser,
         ...globals.node,
+        __SW_CACHE_VERSION__: 'readonly',
       },
     },
     plugins: {

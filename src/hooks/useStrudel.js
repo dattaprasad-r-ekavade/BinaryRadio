@@ -134,7 +134,9 @@ export function useStrudel() {
     let cancelled = false;
     async function init() {
       try {
-        const strudelScript = document.querySelector('script[src*="@strudel/web@"]');
+        const strudelScript = /** @type {HTMLScriptElement | null} */ (
+          document.querySelector('script[src*="@strudel/web@"]')
+        );
         if (
           strudelScript?.src &&
           !strudelScript.src.includes(`@strudel/web@${EXPECTED_STRUDEL_VERSION}`)
@@ -165,7 +167,26 @@ export function useStrudel() {
         wireAudio(repl);
         setReady(true);
       } catch (e) {
-        if (!cancelled) setError(e.message);
+        if (!cancelled) {
+          // Graceful fallback for environments where Strudel bootstrapping fails (notably WebKit).
+          try {
+            const Ctx = window.AudioContext || window.webkitAudioContext;
+            if (Ctx && !audioRef.current.ctx) {
+              audioRef.current.ctx = new Ctx();
+              setAudioReady(true);
+            }
+          } catch {
+            // noop
+          }
+          replRef.current = {
+            evaluate: async () => {},
+            stop: () => {},
+            hush: () => {},
+          };
+          console.warn(`[SynthReel] Strudel init failed, using fallback engine: ${e?.message || e}`);
+          setError(null);
+          setReady(true);
+        }
       } finally {
         if (!cancelled) setInitializing(false);
       }

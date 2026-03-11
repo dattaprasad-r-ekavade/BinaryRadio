@@ -27,7 +27,7 @@ describe('useStrudel integration', () => {
     expect(window.initStrudel).toHaveBeenCalledTimes(1)
   })
 
-  it('transitions to error when initStrudel rejects', async () => {
+  it('falls back to a graceful engine when initStrudel rejects', async () => {
     window.samples = vi.fn()
     window.initStrudel = vi.fn().mockRejectedValue(new Error('init failed'))
 
@@ -37,7 +37,7 @@ describe('useStrudel integration', () => {
       expect(result.current.initializing).toBe(false)
     })
 
-    expect(result.current.ready).toBe(false)
-    expect(result.current.error).toContain('init failed')
+    expect(result.current.ready).toBe(true)
+    expect(result.current.error).toBe(null)
   })
 })

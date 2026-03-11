@@ -28,7 +28,8 @@ describe('useRadioMode integration', () => {
     const onStop = vi.fn()
 
     let resolveAnnouncement
-    playAnnouncementIfAvailable.mockImplementation(
+    const playAnnouncementMock = /** @type {import('vitest').Mock} */ (playAnnouncementIfAvailable)
+    playAnnouncementMock.mockImplementation(
       () =>
         new Promise((resolve) => {
           resolveAnnouncement = resolve
@@ -59,7 +60,7 @@ describe('useRadioMode integration', () => {
 
     expect(onStop).toHaveBeenCalled()
     expect(result.current.phase).toBe('announcing')
-    expect(playAnnouncementIfAvailable).toHaveBeenCalledTimes(1)
+    expect(playAnnouncementMock).toHaveBeenCalledTimes(1)
 
     await act(async () => {
       resolveAnnouncement()

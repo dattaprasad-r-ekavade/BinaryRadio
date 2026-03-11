@@ -25,7 +25,7 @@ export default function Knob({
   onChange,
   trackColor = '#00e87a',
   glowColor = 'rgba(0,232,122,.6)',
-  dragTitle,
+  dragTitle = '',
   dragDirection = 1,
 }) {
   const startY = useRef(null)

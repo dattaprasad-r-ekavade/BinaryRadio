@@ -13,6 +13,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
+    navigator.serviceWorker
+      .register(`/sw.js?cache=${encodeURIComponent(__SW_CACHE_VERSION__)}`)
+      .catch(() => {});
   });
 }

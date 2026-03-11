@@ -23,7 +23,16 @@ function formatDuration(seconds = 0) {
   return `${String(m).padStart(2, '0')}:${String(r).padStart(2, '0')}`
 }
 
-function TBtn({ icon, label, onClick, active, disabled, glow, variant, hidden }) {
+function TBtn({
+  icon,
+  label,
+  onClick,
+  active = false,
+  disabled = false,
+  glow = false,
+  variant = '',
+  hidden = false,
+}) {
   let cls = 'tbtn'
   if (variant) cls += ` tbtn--${variant}`
   if (active) cls += ' tbtn--active'

@@ -11,8 +11,8 @@
 
 Please report security vulnerabilities privately by one of these channels:
 
-- Email: `security@synthreel.dev`
-- GitHub Security Advisory: use the repository's private vulnerability reporting flow
+- GitHub Security Advisory: use the **Private vulnerability reporting** tab in this repository
+  (Repository -> Security -> Advisories -> Report a vulnerability)
 
 Please do not open public issues for unpatched security vulnerabilities.
 

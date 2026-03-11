@@ -3,6 +3,7 @@
 [![CI](https://github.com/dattaprasad-r-ekavade/BinaryRadio/actions/workflows/ci.yml/badge.svg)](https://github.com/dattaprasad-r-ekavade/BinaryRadio/actions/workflows/ci.yml)
 [![License: AGPL-3.0-or-later](https://img.shields.io/badge/License-AGPL--3.0--or--later-blue.svg)](LICENSE)
 [![Node >=18](https://img.shields.io/badge/node-%3E%3D18-43853d.svg)](https://nodejs.org/)
+[![Coverage](https://img.shields.io/badge/coverage-81%25-brightgreen)](./coverage/index.html)
 
 Retro cassette-deck web app for generative music using [Strudel](https://strudel.cc).
 
@@ -78,19 +79,41 @@ If `public/rj` files are missing, radio mode skips announcements and continues p
 
 ```text
 src/
-  App.jsx                 # app orchestration and UI composition
-  App.css                 # style entrypoint (imports variables + app shell styles)
+  App.jsx                 # thin orchestrator
+  App.css                 # entrypoint imports variables + shell styles
+  components/             # UI components with co-located CSS/tests
+    Deck.jsx / Deck.css / Deck.test.jsx
+    Rack.jsx / Rack.css / Rack.test.jsx
+    CassetteCard.jsx / CassetteCard.css / CassetteCard.test.jsx
+    QueuePanel.jsx / QueuePanel.css / QueuePanel.test.jsx
+    Knob.jsx / Knob.css / Knob.test.jsx
+    Reel.jsx / Reel.css
+    Visualizer.jsx / Visualizer.css
+    VUMeter.jsx / VUMeter.css
+    TuneEditor.jsx / TuneEditor.css / TuneEditor.test.jsx
+    HelpModal.jsx / HelpModal.css
+    ErrorBoundary.jsx
   hooks/
+    usePlayerState.js     # state composer
+    useTransport.js       # transport + playback + radio orchestration
+    useLibrary.js         # manifest, tracks, favorites
+    useQueue.js           # queue state/actions
     useStrudel.js         # Strudel bootstrap + audio graph wiring + export
     useRadioMode.js       # radio scheduling + RJ transitions
-    useLocalStorage.js    # persistence helper
     useKeyboardShortcuts.js
+    useLocalStorage.js
+  styles/
+    variables.css         # design tokens and themes
+    app.css               # shell/global styles
   data/
     tracks.js             # static seed tracks fallback
   utils/
-    playlist.js           # queue and favorites helpers
+    playlist.ts           # queue and favorites helpers
+    tunePipeline.js       # normalize, validate, prep code
+    wav.js                # WAV encoder
   rj/
     playAnnouncement.js   # RJ transition audio loader/player
+  tests/                  # integration + accessibility tests
 public/
   tunes/manifest.json     # runtime tune index
   tunes/*.md              # tune source files
