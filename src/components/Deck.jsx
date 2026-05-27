@@ -191,9 +191,9 @@ export default function Deck({
         <TBtn icon="⟳" label="LOOP" onClick={onLoop} active={looping} variant="loop" />
         <TBtn
           icon={exporting ? '⏳' : '⬇'}
-          label={exporting ? 'EXPORTING' : 'EXPORT'}
+          label={exporting ? 'STOP REC' : 'EXPORT'}
           onClick={onExport}
-          disabled={!loaded || exporting}
+          disabled={!loaded}
           variant="loop"
         />
       </div>

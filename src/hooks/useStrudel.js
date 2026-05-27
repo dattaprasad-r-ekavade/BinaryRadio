@@ -274,29 +274,60 @@ export function useStrudel() {
     return true;
   }, []);
 
-  const startWavCapture = useCallback(() => {
+  const startWavCapture = useCallback(async () => {
     if (!audioRef.current.wired && replRef.current) {
       wireAudio(replRef.current);
     }
     const { ctx, analyser } = audioRef.current;
-    if (!ctx || !analyser || !ctx.createScriptProcessor) return false;
+    if (!ctx || !analyser) return false;
     if (audioRef.current.wavProcessor) return true;
-    const processor = ctx.createScriptProcessor(4096, 2, 2);
+
     audioRef.current.wavBuffers = [];
     audioRef.current.wavSampleRate = ctx.sampleRate || 44100;
-    processor.onaudioprocess = (event) => {
-      const inL = event.inputBuffer.getChannelData(0);
-      const inR =
-        event.inputBuffer.numberOfChannels > 1 ? event.inputBuffer.getChannelData(1) : inL;
-      audioRef.current.wavBuffers.push({
-        left: new Float32Array(inL),
-        right: new Float32Array(inR),
-      });
-    };
-    analyser.connect(processor);
-    processor.connect(ctx.destination);
-    audioRef.current.wavProcessor = processor;
-    return true;
+
+    // Preferred: AudioWorklet (works in all modern browsers).
+    if (ctx.audioWorklet) {
+      try {
+        await ctx.audioWorklet.addModule('/wav-capture-processor.js');
+        const workletNode = new AudioWorkletNode(ctx, 'wav-capture-processor', {
+          numberOfInputs: 1,
+          numberOfOutputs: 1,
+          outputChannelCount: [2],
+        });
+        workletNode.port.onmessage = (e) => {
+          audioRef.current.wavBuffers.push({
+            left: new Float32Array(e.data.left),
+            right: new Float32Array(e.data.right),
+          });
+        };
+        analyser.connect(workletNode);
+        workletNode.connect(ctx.destination);
+        audioRef.current.wavProcessor = workletNode;
+        return true;
+      } catch {
+        // fall through to legacy path
+      }
+    }
+
+    // Legacy: ScriptProcessorNode (deprecated, may be absent in newer browsers).
+    if (ctx.createScriptProcessor) {
+      const processor = ctx.createScriptProcessor(4096, 2, 2);
+      processor.onaudioprocess = (event) => {
+        const inL = event.inputBuffer.getChannelData(0);
+        const inR =
+          event.inputBuffer.numberOfChannels > 1 ? event.inputBuffer.getChannelData(1) : inL;
+        audioRef.current.wavBuffers.push({
+          left: new Float32Array(inL),
+          right: new Float32Array(inR),
+        });
+      };
+      analyser.connect(processor);
+      processor.connect(ctx.destination);
+      audioRef.current.wavProcessor = processor;
+      return true;
+    }
+
+    return false;
   }, [wireAudio]);
 
   const stopWavCapture = useCallback(() => {

@@ -26,7 +26,7 @@ export function useWavExport({ startWavCapture, stopWavCapture, loadedTrack, set
       return
     }
 
-    const ok = startWavCapture()
+    const ok = await startWavCapture()
     if (!ok) {
       setMsg({ type: 'err', text: 'Audio export unavailable in this browser/session.' })
       return
