@@ -83,7 +83,13 @@ export function useStrudel() {
         null;
       if (!ctx?.createGain) return;
 
-      const output = repl?.output || repl?.master || repl?.audio?.output || findAudioNode(repl);
+      const output =
+        repl?.output ||
+        repl?.master ||
+        repl?.audio?.output ||
+        repl?.scheduler?.out ||
+        repl?.scheduler?.output ||
+        findAudioNode(repl);
       if (!output?.connect || output === ctx.destination) return;
 
       const bass = ctx.createBiquadFilter();
@@ -269,6 +275,9 @@ export function useStrudel() {
   }, []);
 
   const startWavCapture = useCallback(() => {
+    if (!audioRef.current.wired && replRef.current) {
+      wireAudio(replRef.current);
+    }
     const { ctx, analyser } = audioRef.current;
     if (!ctx || !analyser || !ctx.createScriptProcessor) return false;
     if (audioRef.current.wavProcessor) return true;
@@ -288,7 +297,7 @@ export function useStrudel() {
     processor.connect(ctx.destination);
     audioRef.current.wavProcessor = processor;
     return true;
-  }, []);
+  }, [wireAudio]);
 
   const stopWavCapture = useCallback(() => {
     const processor = audioRef.current.wavProcessor;
