@@ -77,4 +77,17 @@ export const tracks = [
     moodTags: ['cosmic', 'ambient'],
     durationSec: 320,
   },
+  {
+    id: 'goa-sunset',
+    title: 'Goa Sunset',
+    file: '/tunes/goa-sunset.md',
+    color: '#3a2a1a',
+    accent: '#ffaa55',
+    emoji: '\u{1F305}',
+    description: "Mira's beachy sunset mixtape vibes — warm pads, sitar echoes & sea spray",
+    bpm: 92,
+    key: 'C',
+    moodTags: ['goa', 'sunset', 'ambient', 'beach'],
+    durationSec: 310,
+  },
 ];
