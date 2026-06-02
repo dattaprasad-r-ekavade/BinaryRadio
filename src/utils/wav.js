@@ -1,3 +1,9 @@
+/** Resolved URL for the public-folder AudioWorklet used by WAV export. */
+export function getWavCaptureWorkletUrl() {
+  const base = import.meta.env.BASE_URL || '/'
+  return `${base.endsWith('/') ? base : `${base}/`}wav-capture-processor.js`
+}
+
 export function encodeStereoWavBuffer(chunks, sampleRate = 44100) {
   if (!Array.isArray(chunks) || !chunks.length) return null
 

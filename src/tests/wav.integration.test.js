@@ -1,6 +1,10 @@
 // @ts-nocheck — test utilities; typed migration tracked in issue #TS-001
 import { describe, expect, it } from 'vitest'
-import { encodeStereoWav, encodeStereoWavBuffer } from '../utils/wav'
+import {
+  encodeStereoWav,
+  encodeStereoWavBuffer,
+  getWavCaptureWorkletUrl,
+} from '../utils/wav'
 
 function readAscii(view, offset, length) {
   let s = ''
@@ -9,6 +13,11 @@ function readAscii(view, offset, length) {
 }
 
 describe('wav export integration', () => {
+  it('resolves worklet URL with Vite base path', () => {
+    expect(getWavCaptureWorkletUrl()).toMatch(/wav-capture-processor\.js$/)
+    expect(getWavCaptureWorkletUrl()).toContain(import.meta.env.BASE_URL)
+  })
+
   it('produces a valid RIFF/WAVE header', async () => {
     const buffer = encodeStereoWavBuffer(
       [

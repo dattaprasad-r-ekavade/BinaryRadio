@@ -1,6 +1,6 @@
 // @ts-nocheck — complex audio/recorder refs; typed migration tracked in issue #TS-001
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { encodeStereoWav } from '../utils/wav';
+import { encodeStereoWav, getWavCaptureWorkletUrl } from '../utils/wav';
 
 const EXPECTED_STRUDEL_VERSION = '1.3.0';
 
@@ -282,13 +282,21 @@ export function useStrudel() {
     if (!ctx || !analyser) return false;
     if (audioRef.current.wavProcessor) return true;
 
+    if (ctx.state === 'suspended') {
+      try {
+        await ctx.resume();
+      } catch {
+        // capture may still work once the context runs
+      }
+    }
+
     audioRef.current.wavBuffers = [];
     audioRef.current.wavSampleRate = ctx.sampleRate || 44100;
 
     // Preferred: AudioWorklet (works in all modern browsers).
     if (ctx.audioWorklet) {
       try {
-        await ctx.audioWorklet.addModule('/wav-capture-processor.js');
+        await ctx.audioWorklet.addModule(getWavCaptureWorkletUrl());
         const workletNode = new AudioWorkletNode(ctx, 'wav-capture-processor', {
           numberOfInputs: 1,
           numberOfOutputs: 1,
