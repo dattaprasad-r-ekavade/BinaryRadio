@@ -91,6 +91,7 @@ export default function Deck({
   radioPhase,
   radioTimeLeft,
   onRadioToggle,
+  onRadioSkip,
   visualMode,
   onVisualMode,
   analyser,
@@ -159,9 +160,19 @@ export default function Deck({
               RJ Radio
             </button>
             {radioEnabled && (
-              <span className="radio-status">
-                {radioPhase === 'announcing' ? 'DJ' : 'Music'} • {Math.max(0, radioTimeLeft)}s
-              </span>
+              <>
+                <button
+                  type="button"
+                  className="mini-btn"
+                  onClick={onRadioSkip}
+                  title="Skip to next RJ announcement"
+                >
+                  Skip → RJ
+                </button>
+                <span className="radio-status">
+                  {radioPhase === 'announcing' ? 'DJ' : 'Music'} • {Math.max(0, radioTimeLeft)}s
+                </span>
+              </>
             )}
           </div>
         </div>
@@ -323,6 +334,7 @@ Deck.propTypes = {
   radioPhase: PropTypes.string.isRequired,
   radioTimeLeft: PropTypes.number,
   onRadioToggle: PropTypes.func.isRequired,
+  onRadioSkip: PropTypes.func.isRequired,
   visualMode: PropTypes.oneOf(['spectrum', 'waveform']).isRequired,
   onVisualMode: PropTypes.func.isRequired,
   analyser: PropTypes.shape({

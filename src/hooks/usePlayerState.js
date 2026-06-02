@@ -54,6 +54,7 @@ export function usePlayerState() {
         exportWav: transport.actions.exportWav,
         radioLoad: transport.actions.radioLoad,
         radioToggle: transport.actions.radioToggle,
+        radioSkip: transport.actions.radioSkip,
       },
     },
     library: {

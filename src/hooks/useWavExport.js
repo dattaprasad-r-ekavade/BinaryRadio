@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react'
+import { logExportError, logExportWarn } from '../utils/exportLog'
 
 function downloadBlob(blob, name) {
   const url = URL.createObjectURL(blob)
@@ -18,6 +19,7 @@ export function useWavExport({
   startWavCapture,
   stopWavCapture,
   canExportAudio,
+  getExportDiagnostics,
   audioReady,
   deckState,
   loadedTrack,
@@ -30,7 +32,11 @@ export function useWavExport({
       setMsg({ type: 'wait', text: 'Finishing export…' })
       const result = await stopWavCapture()
       setExporting(false)
-      if (!result?.blob) {
+      if (!result?.ok || !result?.blob) {
+        logExportError('Export stop failed', {
+          reason: result?.reason ?? 'unknown',
+          diagnostics: getExportDiagnostics?.(),
+        })
         setMsg({
           type: 'err',
           text: 'No audio captured. Play the track while recording, then try again.',
@@ -44,11 +50,13 @@ export function useWavExport({
     }
 
     if (!loadedTrack) {
+      logExportWarn('Export blocked: no track loaded')
       setMsg({ type: 'err', text: 'Load a cassette before exporting.' })
       return
     }
 
     if (deckState !== 'playing') {
+      logExportWarn('Export blocked: deck not playing', { deckState })
       setMsg({
         type: 'err',
         text: 'Press PLAY first so audio is running, then start recording.',
@@ -57,6 +65,8 @@ export function useWavExport({
     }
 
     if (!canExportAudio()) {
+      const diagnostics = getExportDiagnostics?.()
+      logExportError('Export blocked: audio capture path not ready', diagnostics)
       setMsg({
         type: 'err',
         text: audioReady
@@ -66,11 +76,15 @@ export function useWavExport({
       return
     }
 
-    const ok = await startWavCapture()
-    if (!ok) {
+    const start = await startWavCapture()
+    if (!start?.ok) {
+      logExportError('startWavCapture failed', {
+        reason: start?.reason ?? 'unknown',
+        diagnostics: start?.diagnostics ?? getExportDiagnostics?.(),
+      })
       setMsg({
         type: 'err',
-        text: 'Could not start export recording. Refresh the page and try again after pressing PLAY.',
+        text: 'Could not start export recording. Open the browser console for details.',
       })
       return
     }
@@ -81,6 +95,7 @@ export function useWavExport({
     canExportAudio,
     deckState,
     exporting,
+    getExportDiagnostics,
     loadedTrack,
     setMsg,
     startWavCapture,

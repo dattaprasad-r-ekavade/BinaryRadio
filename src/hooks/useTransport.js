@@ -67,6 +67,7 @@ export function useTransport({
     startWavCapture,
     stopWavCapture,
     canExportAudio,
+    getExportDiagnostics,
     warmup,
   } = useStrudel()
 
@@ -212,6 +213,7 @@ export function useTransport({
     startWavCapture,
     stopWavCapture,
     canExportAudio,
+    getExportDiagnostics,
     audioReady,
     deckState: state.deckState,
     loadedTrack: state.loadedTrack,
@@ -296,6 +298,10 @@ export function useTransport({
     radio.toggle(idx)
   }, [radio, state.loadedTrack, tracks])
 
+  const handleRadioSkip = useCallback(() => {
+    radio.skipToNext()
+  }, [radio])
+
   const engineState = initializing ? 'wait' : error ? 'err' : ready ? 'ok' : 'wait'
   const engineLabel = initializing ? 'LOADING…' : error ? 'ENGINE ERROR' : ready ? 'ENGINE READY' : 'OFFLINE'
 
@@ -328,6 +334,7 @@ export function useTransport({
       exportWav: handleExport,
       radioLoad: handleRadioLoad,
       radioToggle: handleRadioToggle,
+      radioSkip: handleRadioSkip,
       setShowEditor: (v) => setField('showEditor', v),
       setShowShortcuts: (v) => setField('showShortcuts', v),
       install: pwaInstall.handleInstall,

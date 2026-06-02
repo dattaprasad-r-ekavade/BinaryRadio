@@ -20,6 +20,7 @@ const baseProps = {
   radioPhase: 'music',
   radioTimeLeft: 0,
   onRadioToggle: vi.fn(),
+  onRadioSkip: vi.fn(),
   visualMode: 'spectrum',
   onVisualMode: vi.fn(),
   analyser: null,

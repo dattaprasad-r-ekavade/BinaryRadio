@@ -52,6 +52,14 @@ export default function HelpModal({ open, onClose }) {
             <kbd>H</kbd> toggle this help panel
           </li>
         </ul>
+        <h3 className="shortcuts-subhd">RJ Radio</h3>
+        <ol className="shortcuts-export-steps">
+          <li>Enable <strong>RJ Radio</strong> on the deck to auto-advance tracks.</li>
+          <li>
+            Use <strong>Skip → RJ</strong> during a song to jump straight to the DJ announcement (handy
+            for demos).
+          </li>
+        </ol>
         <h3 className="shortcuts-subhd">WAV export</h3>
         <ol className="shortcuts-export-steps">
           <li>Load a cassette and wait for ENGINE READY.</li>

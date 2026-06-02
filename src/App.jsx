@@ -84,6 +84,7 @@ export default function App() {
         radioPhase={transport.radio.phase}
         radioTimeLeft={transport.radio.timeLeft}
         onRadioToggle={transport.actions.radioToggle}
+        onRadioSkip={transport.actions.radioSkip}
         visualMode={transport.visualMode}
         onVisualMode={transport.actions.setVisualMode}
         analyser={transport.analyser}

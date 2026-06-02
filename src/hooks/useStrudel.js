@@ -1,6 +1,12 @@
 // @ts-nocheck — complex audio/recorder refs; typed migration tracked in issue #TS-001
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { decodeBlobToStereoChunks, encodeStereoWav, loadWavCaptureWorklet } from '../utils/wav';
+import { logExportError, logExportInfo, logExportWarn } from '../utils/exportLog';
+import {
+  decodeBlobToStereoChunks,
+  encodeStereoWav,
+  getWavCaptureWorkletUrl,
+  loadWavCaptureWorklet,
+} from '../utils/wav';
 
 const EXPECTED_STRUDEL_VERSION = '1.3.0';
 
@@ -252,7 +258,7 @@ export function useStrudel() {
     init();
     return () => {
       cancelled = true;
-      audioRef.current.restoreConnect?.();
+      audioState.current.restoreConnect?.();
     };
   }, [wireAudio]);
 
@@ -339,19 +345,44 @@ export function useStrudel() {
     });
   }, []);
 
+  const getExportDiagnostics = useCallback(() => {
+    const a = audioRef.current;
+    return {
+      wired: a.wired,
+      audioReadyState: a.ctx?.state ?? null,
+      hasCtx: !!a.ctx,
+      hasAnalyser: !!a.analyser,
+      hasRecDest: !!a.recDest,
+      hasAudioWorklet: !!a.ctx?.audioWorklet,
+      hasScriptProcessor: !!a.ctx?.createScriptProcessor,
+      hasMediaRecorder: typeof MediaRecorder !== 'undefined',
+      captureMode: a.wavCaptureMode,
+      bufferChunks: a.wavBuffers?.length ?? 0,
+      workletUrl: getWavCaptureWorkletUrl(),
+    };
+  }, []);
+
   const startWavCapture = useCallback(async () => {
     if (!audioRef.current.wired && replRef.current) {
       wireAudio(replRef.current);
     }
+    const diag = getExportDiagnostics();
     const { ctx, analyser, recDest } = audioRef.current;
-    if (!ctx) return false;
-    if (audioRef.current.wavCaptureMode) return true;
+    if (!ctx) {
+      logExportError('startWavCapture: no AudioContext', diag);
+      return { ok: false, reason: 'no-audio-context', diagnostics: diag };
+    }
+    if (audioRef.current.wavCaptureMode) {
+      logExportInfo('startWavCapture: already capturing', { mode: audioRef.current.wavCaptureMode });
+      return { ok: true, mode: audioRef.current.wavCaptureMode };
+    }
 
     if (ctx.state === 'suspended') {
       try {
         await ctx.resume();
-      } catch {
-        // capture may still work once the context runs
+        logExportInfo('AudioContext resumed for export', { state: ctx.state });
+      } catch (err) {
+        logExportWarn('AudioContext.resume() failed', { error: String(err), state: ctx.state });
       }
     }
 
@@ -359,96 +390,162 @@ export function useStrudel() {
     audioRef.current.wavSampleRate = ctx.sampleRate || 44100;
 
     if (analyser) {
-      // Preferred: AudioWorklet (works in all modern browsers).
-      if (ctx.audioWorklet && (await loadWavCaptureWorklet(ctx))) {
-        try {
-          const workletNode = new AudioWorkletNode(ctx, 'wav-capture-processor', {
-            numberOfInputs: 1,
-            numberOfOutputs: 1,
-            outputChannelCount: [2],
+      if (ctx.audioWorklet) {
+        const workletLoad = await loadWavCaptureWorklet(ctx);
+        if (workletLoad.ok) {
+          try {
+            const workletNode = new AudioWorkletNode(ctx, 'wav-capture-processor', {
+              numberOfInputs: 1,
+              numberOfOutputs: 1,
+              outputChannelCount: [2],
+            });
+            workletNode.port.onmessage = (e) => {
+              audioRef.current.wavBuffers.push({
+                left: new Float32Array(e.data.left),
+                right: new Float32Array(e.data.right),
+              });
+            };
+            analyser.connect(workletNode);
+            workletNode.connect(ctx.destination);
+            audioRef.current.wavProcessor = workletNode;
+            audioRef.current.wavCaptureMode = 'worklet';
+            logExportInfo('Capture started via AudioWorklet', diag);
+            return { ok: true, mode: 'worklet' };
+          } catch (err) {
+            audioRef.current.wavProcessor = null;
+            logExportError('AudioWorkletNode setup failed', { error: String(err), ...diag });
+          }
+        } else {
+          logExportWarn('Worklet unavailable; trying fallbacks', {
+            workletReason: workletLoad.reason,
+            ...diag,
           });
-          workletNode.port.onmessage = (e) => {
+        }
+      } else {
+        logExportWarn('AudioWorklet not supported in this context', diag);
+      }
+
+      if (ctx.createScriptProcessor) {
+        try {
+          const processor = ctx.createScriptProcessor(4096, 2, 2);
+          processor.onaudioprocess = (event) => {
+            const inL = event.inputBuffer.getChannelData(0);
+            const inR =
+              event.inputBuffer.numberOfChannels > 1 ? event.inputBuffer.getChannelData(1) : inL;
             audioRef.current.wavBuffers.push({
-              left: new Float32Array(e.data.left),
-              right: new Float32Array(e.data.right),
+              left: new Float32Array(inL),
+              right: new Float32Array(inR),
             });
           };
-          analyser.connect(workletNode);
-          workletNode.connect(ctx.destination);
-          audioRef.current.wavProcessor = workletNode;
-          audioRef.current.wavCaptureMode = 'worklet';
-          return true;
-        } catch {
-          audioRef.current.wavProcessor = null;
+          analyser.connect(processor);
+          processor.connect(ctx.destination);
+          audioRef.current.wavProcessor = processor;
+          audioRef.current.wavCaptureMode = 'script';
+          logExportInfo('Capture started via ScriptProcessor', diag);
+          return { ok: true, mode: 'script' };
+        } catch (err) {
+          logExportError('ScriptProcessor setup failed', { error: String(err), ...diag });
         }
+      } else {
+        logExportWarn('ScriptProcessor not available', diag);
       }
-
-      // Legacy: ScriptProcessorNode (deprecated, may be absent in newer browsers).
-      if (ctx.createScriptProcessor) {
-        const processor = ctx.createScriptProcessor(4096, 2, 2);
-        processor.onaudioprocess = (event) => {
-          const inL = event.inputBuffer.getChannelData(0);
-          const inR =
-            event.inputBuffer.numberOfChannels > 1 ? event.inputBuffer.getChannelData(1) : inL;
-          audioRef.current.wavBuffers.push({
-            left: new Float32Array(inL),
-            right: new Float32Array(inR),
-          });
-        };
-        analyser.connect(processor);
-        processor.connect(ctx.destination);
-        audioRef.current.wavProcessor = processor;
-        audioRef.current.wavCaptureMode = 'script';
-        return true;
-      }
+    } else {
+      logExportWarn('No analyser node; skipping worklet/script capture paths', diag);
     }
 
-    // Fallback: MediaRecorder on the EQ/master tap (requires wired recDest).
     if (recDest && typeof MediaRecorder !== 'undefined') {
       const started = startRecording();
       if (started) {
         audioRef.current.wavCaptureMode = 'mediarecorder';
-        return true;
+        logExportInfo('Capture started via MediaRecorder', diag);
+        return { ok: true, mode: 'mediarecorder' };
       }
+      logExportError('MediaRecorder.start failed', diag);
+    } else {
+      logExportError('MediaRecorder fallback unavailable', {
+        hasRecDest: !!recDest,
+        hasMediaRecorder: typeof MediaRecorder !== 'undefined',
+        ...diag,
+      });
     }
 
-    return false;
-  }, [startRecording, wireAudio]);
+    logExportError('startWavCapture: all capture paths failed', diag);
+    return { ok: false, reason: 'capture-unavailable', diagnostics: diag };
+  }, [getExportDiagnostics, startRecording, wireAudio]);
 
   const stopWavCapture = useCallback(async () => {
     const mode = audioRef.current.wavCaptureMode;
-    if (!mode) return null;
+    if (!mode) {
+      logExportError('stopWavCapture: not recording', getExportDiagnostics());
+      return { ok: false, reason: 'not-recording' };
+    }
     audioRef.current.wavCaptureMode = null;
 
     if (mode === 'mediarecorder') {
       const recorded = await stopRecording();
-      if (!recorded?.blob?.size) return null;
+      if (!recorded?.blob?.size) {
+        logExportError('stopWavCapture: MediaRecorder produced empty blob', {
+          mimeType: recorded?.mimeType,
+          ...getExportDiagnostics(),
+        });
+        return { ok: false, reason: 'empty-recording' };
+      }
       const decoded = await decodeBlobToStereoChunks(recorded.blob);
-      if (!decoded?.chunks?.length) return null;
+      if (!decoded?.chunks?.length) {
+        logExportError('stopWavCapture: could not decode recorded blob to PCM', {
+          blobSize: recorded.blob.size,
+          mimeType: recorded.mimeType,
+        });
+        return { ok: false, reason: 'decode-failed' };
+      }
       const blob = encodeStereoWav(decoded.chunks, decoded.sampleRate);
-      if (!blob) return null;
-      return { blob, mimeType: 'audio/wav' };
+      if (!blob) {
+        logExportError('stopWavCapture: encodeStereoWav returned null after decode', {
+          chunkCount: decoded.chunks.length,
+          sampleRate: decoded.sampleRate,
+        });
+        return { ok: false, reason: 'encode-failed' };
+      }
+      logExportInfo('Export finished (MediaRecorder path)', { bytes: blob.size });
+      return { ok: true, blob, mimeType: 'audio/wav' };
     }
 
     const processor = audioRef.current.wavProcessor;
-    if (!processor) return null;
+    if (!processor) {
+      logExportError('stopWavCapture: missing processor node', { mode, ...getExportDiagnostics() });
+      return { ok: false, reason: 'missing-processor' };
+    }
     processor.disconnect();
     try {
       audioRef.current.analyser?.disconnect(processor);
-    } catch {
-      // noop
+    } catch (err) {
+      logExportWarn('disconnect processor warning', { error: String(err) });
     }
     audioRef.current.wavProcessor = null;
 
     const chunks = audioRef.current.wavBuffers;
-    if (!chunks.length) return null;
+    if (!chunks.length) {
+      logExportError('stopWavCapture: no audio buffers captured', {
+        mode,
+        hint: 'Was PLAY running during the whole recording?',
+        ...getExportDiagnostics(),
+      });
+      return { ok: false, reason: 'no-buffers' };
+    }
     audioRef.current.wavBuffers = [];
 
     const sampleRate = audioRef.current.wavSampleRate || 44100;
     const blob = encodeStereoWav(chunks, sampleRate);
-    if (!blob) return null;
-    return { blob, mimeType: 'audio/wav' };
-  }, [stopRecording]);
+    if (!blob) {
+      logExportError('stopWavCapture: encodeStereoWav returned null', {
+        chunkCount: chunks.length,
+        sampleRate,
+      });
+      return { ok: false, reason: 'encode-failed' };
+    }
+    logExportInfo('Export finished', { mode, bytes: blob.size, chunkCount: chunks.length, sampleRate });
+    return { ok: true, blob, mimeType: 'audio/wav' };
+  }, [getExportDiagnostics, stopRecording]);
 
   const canExportAudio = useCallback(() => {
     const { ctx, analyser, recDest, wired } = audioRef.current;
@@ -494,6 +591,7 @@ export function useStrudel() {
     startWavCapture,
     stopWavCapture,
     canExportAudio,
+    getExportDiagnostics,
     warmup,
   };
 }

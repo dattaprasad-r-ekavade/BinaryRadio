@@ -1,3 +1,4 @@
+import { logExportError } from './exportLog'
 import { resolvePublicUrl } from './publicUrl'
 
 /** Resolved URL for the public-folder AudioWorklet used by WAV export. */
@@ -10,21 +11,29 @@ export async function loadWavCaptureWorklet(ctx) {
   const url = getWavCaptureWorkletUrl()
   try {
     await ctx.audioWorklet.addModule(url)
-    return true
-  } catch {
+    return { ok: true }
+  } catch (err) {
+    logExportWarn('Worklet addModule failed; trying fetch + blob URL', { url, error: String(err) })
     try {
       const res = await fetch(url)
-      if (!res.ok) return false
+      if (!res.ok) {
+        logExportError('Worklet fetch failed', { url, status: res.status, statusText: res.statusText })
+        return { ok: false, reason: `worklet-fetch-${res.status}`, error: err }
+      }
       const source = await res.text()
       const blobUrl = URL.createObjectURL(new Blob([source], { type: 'application/javascript' }))
       try {
         await ctx.audioWorklet.addModule(blobUrl)
-        return true
+        return { ok: true }
+      } catch (blobErr) {
+        logExportError('Worklet blob addModule failed', { url, error: String(blobErr) })
+        return { ok: false, reason: 'worklet-blob-add-failed', error: blobErr }
       } finally {
         URL.revokeObjectURL(blobUrl)
       }
-    } catch {
-      return false
+    } catch (fetchErr) {
+      logExportError('Worklet load failed completely', { url, error: String(fetchErr) })
+      return { ok: false, reason: 'worklet-load-failed', error: fetchErr }
     }
   }
 }
@@ -42,7 +51,12 @@ export async function decodeBlobToStereoChunks(blob) {
       chunks: [{ left: new Float32Array(left), right: new Float32Array(right) }],
       sampleRate: buffer.sampleRate || 44100,
     }
-  } catch {
+  } catch (err) {
+    logExportError('decodeAudioData failed for recorded blob', {
+      error: String(err),
+      blobType: blob?.type,
+      blobSize: blob?.size,
+    })
     return null
   } finally {
     await ctx.close().catch(() => {})
