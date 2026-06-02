@@ -1,9 +1,14 @@
+import { resolvePublicUrl } from './publicUrl'
+
 const SAMPLE_CALL_RE = /\bs\((['"])([\s\S]*?)\1\)/g
 const SAMPLE_TOKEN_RE = /\b([a-zA-Z][a-zA-Z0-9_-]*)(?::(\d+))?\b/g
 
 export function normalizeTrack(track, index = 0) {
+  const file =
+    track.file && !/^https?:\/\//i.test(track.file) ? resolvePublicUrl(track.file) : track.file
   return {
     ...track,
+    file,
     title: track.title || `Untitled ${index + 1}`,
     description: track.description || 'Custom tune',
     color: track.color || '#1b3a60',

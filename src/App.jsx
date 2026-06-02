@@ -84,6 +84,7 @@ export default function App() {
         radioPhase={transport.radio.phase}
         radioTimeLeft={transport.radio.timeLeft}
         onRadioToggle={transport.actions.radioToggle}
+        onRadioSkip={transport.actions.radioSkip}
         visualMode={transport.visualMode}
         onVisualMode={transport.actions.setVisualMode}
         analyser={transport.analyser}
@@ -93,7 +94,9 @@ export default function App() {
         onEq={ui.actions.setEq}
         onExport={transport.actions.exportWav}
         exporting={transport.exporting}
+        exportHint={transport.exportHint}
         audioReady={transport.audioReady}
+        deckState={transport.deckState}
       />
 
       <p className="sr-only" aria-live="polite">

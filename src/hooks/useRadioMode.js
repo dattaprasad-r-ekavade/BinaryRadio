@@ -101,6 +101,16 @@ export function useRadioMode({ tracks, onLoadAndPlay, onStop, rjVolume = 1 }) {
     onStop();
   }, [onStop]);
 
+  /** End current track early and run the RJ transition (announcement + next song). */
+  const skipToNext = useCallback(() => {
+    if (!s.current.enabled) return;
+    clearTimers();
+    setTimeLeft(0);
+    stopAudio();
+    onStop();
+    void runTransitionRef.current(s.current.index);
+  }, [onStop]);
+
   const toggle = useCallback(
     (startIndex = 0) => {
       const next = !s.current.enabled;
@@ -120,5 +130,5 @@ export function useRadioMode({ tracks, onLoadAndPlay, onStop, rjVolume = 1 }) {
     [],
   );
 
-  return { enabled, phase, timeLeft, start, stop, toggle };
+  return { enabled, phase, timeLeft, start, stop, skipToNext, toggle };
 }

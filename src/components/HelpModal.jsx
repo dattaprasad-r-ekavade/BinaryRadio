@@ -52,6 +52,28 @@ export default function HelpModal({ open, onClose }) {
             <kbd>H</kbd> toggle this help panel
           </li>
         </ul>
+        <h3 className="shortcuts-subhd">RJ Radio</h3>
+        <ol className="shortcuts-export-steps">
+          <li>Enable <strong>RJ Radio</strong> on the deck to auto-advance tracks.</li>
+          <li>
+            Use <strong>Skip → RJ</strong> during a song to jump straight to the DJ announcement (handy
+            for demos).
+          </li>
+        </ol>
+        <h3 className="shortcuts-subhd">WAV export</h3>
+        <ol className="shortcuts-export-steps">
+          <li>Load a cassette and wait for ENGINE READY.</li>
+          <li>
+            Press <kbd>PLAY</kbd> so audio is actually running (required for capture).
+          </li>
+          <li>
+            Tap <strong>Start Rec</strong> on the deck — recording begins immediately.
+          </li>
+          <li>Let the tune play for as long as you want in the file.</li>
+          <li>
+            Tap <strong>Save WAV</strong> — your browser downloads a <code>.wav</code> file.
+          </li>
+        </ol>
       </section>
     </div>
   )

@@ -91,6 +91,7 @@ export default function Deck({
   radioPhase,
   radioTimeLeft,
   onRadioToggle,
+  onRadioSkip,
   visualMode,
   onVisualMode,
   analyser,
@@ -100,6 +101,9 @@ export default function Deck({
   onEq,
   onExport,
   exporting,
+  exportHint,
+  audioReady,
+  deckState,
 }) {
   const bpm = Math.round(cps * 60 * 4)
   const loaded = !!track
@@ -156,9 +160,19 @@ export default function Deck({
               RJ Radio
             </button>
             {radioEnabled && (
-              <span className="radio-status">
-                {radioPhase === 'announcing' ? 'DJ' : 'Music'} • {Math.max(0, radioTimeLeft)}s
-              </span>
+              <>
+                <button
+                  type="button"
+                  className="mini-btn"
+                  onClick={onRadioSkip}
+                  title="Skip to next RJ announcement"
+                >
+                  Skip → RJ
+                </button>
+                <span className="radio-status">
+                  {radioPhase === 'announcing' ? 'DJ' : 'Music'} • {Math.max(0, radioTimeLeft)}s
+                </span>
+              </>
             )}
           </div>
         </div>
@@ -190,13 +204,36 @@ export default function Deck({
         />
         <TBtn icon="⟳" label="LOOP" onClick={onLoop} active={looping} variant="loop" />
         <TBtn
-          icon={exporting ? '⏳' : '⬇'}
-          label={exporting ? 'STOP REC' : 'EXPORT'}
+          icon={exporting ? '💾' : '●'}
+          label={exporting ? 'SAVE WAV' : 'START REC'}
           onClick={onExport}
-          disabled={!loaded}
+          disabled={!loaded || !ready}
+          active={exporting}
           variant="loop"
         />
       </div>
+
+      {loaded && (
+        <div
+          className={exporting ? 'export-hint export-hint--active' : 'export-hint'}
+          role="note"
+          aria-label="WAV export instructions"
+          aria-live="polite"
+        >
+          <strong className="export-hint-title">WAV export</strong>
+          <ol className="export-hint-steps">
+            <li className={deckState === 'playing' ? 'export-hint-step--done' : ''}>Press PLAY</li>
+            <li className={exporting ? 'export-hint-step--done' : ''}>
+              {exporting ? 'Recording — tap Save WAV when done' : 'Tap Start Rec'}
+            </li>
+            <li>Tap Save WAV to download</li>
+          </ol>
+          <p className="export-hint-detail">{exportHint}</p>
+          {!audioReady && ready && (
+            <p className="export-hint-warn">Audio routing activates after the first PLAY.</p>
+          )}
+        </div>
+      )}
 
       <div className="deck-controls-grid">
         <div className="knob-card">
@@ -297,6 +334,7 @@ Deck.propTypes = {
   radioPhase: PropTypes.string.isRequired,
   radioTimeLeft: PropTypes.number,
   onRadioToggle: PropTypes.func.isRequired,
+  onRadioSkip: PropTypes.func.isRequired,
   visualMode: PropTypes.oneOf(['spectrum', 'waveform']).isRequired,
   onVisualMode: PropTypes.func.isRequired,
   analyser: PropTypes.shape({
@@ -315,4 +353,7 @@ Deck.propTypes = {
   onEq: PropTypes.func.isRequired,
   onExport: PropTypes.func.isRequired,
   exporting: PropTypes.bool.isRequired,
+  exportHint: PropTypes.string,
+  audioReady: PropTypes.bool,
+  deckState: PropTypes.oneOf(['playing', 'paused', 'stopped']),
 }

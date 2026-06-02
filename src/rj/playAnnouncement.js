@@ -1,9 +1,11 @@
+import { resolvePublicUrl } from '../utils/publicUrl'
+
 function clampVolume(value) {
   return Math.max(0, Math.min(1, Number.isFinite(value) ? value : 1));
 }
 
 export function getAnnouncementPath(currentTrack, nextTrack) {
-  return `/rj/${currentTrack.id}-to-${nextTrack.id}.mp3`;
+  return resolvePublicUrl(`/rj/${currentTrack.id}-to-${nextTrack.id}.mp3`);
 }
 
 async function hasAnnouncementFile(path) {

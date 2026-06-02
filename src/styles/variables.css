@@ -118,6 +118,11 @@
   --body-glow: color-mix(in srgb, var(--blue) 10%, transparent);
 }
 
+html {
+  /* Scales all rem-based UI text (~25% larger than browser default). */
+  font-size: 125%;
+}
+
 html,
 body {
   min-height: 100vh;

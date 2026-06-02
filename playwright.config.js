@@ -10,14 +10,14 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   reporter: [['list'], ['html', { open: 'never' }]],
   use: {
-    baseURL: 'http://127.0.0.1:4173',
+    baseURL: 'http://127.0.0.1:4173/BinaryRadio/',
     trace: 'on-first-retry',
   },
   webServer: {
     command: process.env.CI
-      ? 'npm run build && npm run preview -- --host 127.0.0.1 --port 4173'
+      ? 'npm run build -- --base=/BinaryRadio/ && npm run preview -- --host 127.0.0.1 --port 4173 --base /BinaryRadio/'
       : 'npm run dev -- --host 127.0.0.1 --port 4173',
-    url: 'http://127.0.0.1:4173',
+    url: process.env.CI ? 'http://127.0.0.1:4173/BinaryRadio/' : 'http://127.0.0.1:4173',
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
   },

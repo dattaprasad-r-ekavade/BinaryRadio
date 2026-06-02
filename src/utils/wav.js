@@ -1,7 +1,66 @@
+import { logExportError } from './exportLog'
+import { resolvePublicUrl } from './publicUrl'
+
 /** Resolved URL for the public-folder AudioWorklet used by WAV export. */
 export function getWavCaptureWorkletUrl() {
-  const base = import.meta.env.BASE_URL || '/'
-  return `${base.endsWith('/') ? base : `${base}/`}wav-capture-processor.js`
+  return resolvePublicUrl('/wav-capture-processor.js')
+}
+
+/** Load the capture worklet via URL, with a blob-URL fallback if addModule fails. */
+export async function loadWavCaptureWorklet(ctx) {
+  const url = getWavCaptureWorkletUrl()
+  try {
+    await ctx.audioWorklet.addModule(url)
+    return { ok: true }
+  } catch (err) {
+    logExportWarn('Worklet addModule failed; trying fetch + blob URL', { url, error: String(err) })
+    try {
+      const res = await fetch(url)
+      if (!res.ok) {
+        logExportError('Worklet fetch failed', { url, status: res.status, statusText: res.statusText })
+        return { ok: false, reason: `worklet-fetch-${res.status}`, error: err }
+      }
+      const source = await res.text()
+      const blobUrl = URL.createObjectURL(new Blob([source], { type: 'application/javascript' }))
+      try {
+        await ctx.audioWorklet.addModule(blobUrl)
+        return { ok: true }
+      } catch (blobErr) {
+        logExportError('Worklet blob addModule failed', { url, error: String(blobErr) })
+        return { ok: false, reason: 'worklet-blob-add-failed', error: blobErr }
+      } finally {
+        URL.revokeObjectURL(blobUrl)
+      }
+    } catch (fetchErr) {
+      logExportError('Worklet load failed completely', { url, error: String(fetchErr) })
+      return { ok: false, reason: 'worklet-load-failed', error: fetchErr }
+    }
+  }
+}
+
+/** Decode a recorded WebM/OGG blob into stereo float chunks for WAV encoding. */
+export async function decodeBlobToStereoChunks(blob) {
+  const Ctx = window.AudioContext || window.webkitAudioContext
+  if (!Ctx || !blob) return null
+  const ctx = new Ctx()
+  try {
+    const buffer = await ctx.decodeAudioData(await blob.arrayBuffer())
+    const left = buffer.getChannelData(0)
+    const right = buffer.numberOfChannels > 1 ? buffer.getChannelData(1) : left
+    return {
+      chunks: [{ left: new Float32Array(left), right: new Float32Array(right) }],
+      sampleRate: buffer.sampleRate || 44100,
+    }
+  } catch (err) {
+    logExportError('decodeAudioData failed for recorded blob', {
+      error: String(err),
+      blobType: blob?.type,
+      blobSize: blob?.size,
+    })
+    return null
+  } finally {
+    await ctx.close().catch(() => {})
+  }
 }
 
 export function encodeStereoWavBuffer(chunks, sampleRate = 44100) {

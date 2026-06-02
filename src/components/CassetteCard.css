@@ -37,7 +37,7 @@
 .cas-actions {
   position: absolute;
   top: 6px;
-  right: 6px;
+  left: 6px;
   display: flex;
   gap: 4px;
   z-index: 2;
@@ -66,7 +66,7 @@
   right: 0;
   height: 58%;
   background: var(--cc, #1b3a60);
-  padding: 6px 8px;
+  padding: 6px 8px 6px 52px;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -77,6 +77,8 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
+  gap: 6px;
+  padding-right: 2px;
 }
 
 .cas-emoji {
