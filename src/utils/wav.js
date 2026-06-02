@@ -1,7 +1,52 @@
+import { resolvePublicUrl } from './publicUrl'
+
 /** Resolved URL for the public-folder AudioWorklet used by WAV export. */
 export function getWavCaptureWorkletUrl() {
-  const base = import.meta.env.BASE_URL || '/'
-  return `${base.endsWith('/') ? base : `${base}/`}wav-capture-processor.js`
+  return resolvePublicUrl('/wav-capture-processor.js')
+}
+
+/** Load the capture worklet via URL, with a blob-URL fallback if addModule fails. */
+export async function loadWavCaptureWorklet(ctx) {
+  const url = getWavCaptureWorkletUrl()
+  try {
+    await ctx.audioWorklet.addModule(url)
+    return true
+  } catch {
+    try {
+      const res = await fetch(url)
+      if (!res.ok) return false
+      const source = await res.text()
+      const blobUrl = URL.createObjectURL(new Blob([source], { type: 'application/javascript' }))
+      try {
+        await ctx.audioWorklet.addModule(blobUrl)
+        return true
+      } finally {
+        URL.revokeObjectURL(blobUrl)
+      }
+    } catch {
+      return false
+    }
+  }
+}
+
+/** Decode a recorded WebM/OGG blob into stereo float chunks for WAV encoding. */
+export async function decodeBlobToStereoChunks(blob) {
+  const Ctx = window.AudioContext || window.webkitAudioContext
+  if (!Ctx || !blob) return null
+  const ctx = new Ctx()
+  try {
+    const buffer = await ctx.decodeAudioData(await blob.arrayBuffer())
+    const left = buffer.getChannelData(0)
+    const right = buffer.numberOfChannels > 1 ? buffer.getChannelData(1) : left
+    return {
+      chunks: [{ left: new Float32Array(left), right: new Float32Array(right) }],
+      sampleRate: buffer.sampleRate || 44100,
+    }
+  } catch {
+    return null
+  } finally {
+    await ctx.close().catch(() => {})
+  }
 }
 
 export function encodeStereoWavBuffer(chunks, sampleRate = 44100) {

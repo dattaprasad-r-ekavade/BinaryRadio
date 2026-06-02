@@ -93,7 +93,9 @@ export default function App() {
         onEq={ui.actions.setEq}
         onExport={transport.actions.exportWav}
         exporting={transport.exporting}
+        exportHint={transport.exportHint}
         audioReady={transport.audioReady}
+        deckState={transport.deckState}
       />
 
       <p className="sr-only" aria-live="polite">

@@ -56,3 +56,25 @@
   font-size: 0.62rem;
   text-align: center;
 }
+
+.shortcuts-subhd {
+  margin: 14px 0 8px;
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--amber);
+}
+
+.shortcuts-export-steps {
+  margin: 0;
+  padding-left: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--dim);
+}
+
+.shortcuts-export-steps code {
+  font-family: var(--mono);
+  font-size: 0.9em;
+}

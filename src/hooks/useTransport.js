@@ -66,6 +66,7 @@ export function useTransport({
     getAnalyser,
     startWavCapture,
     stopWavCapture,
+    canExportAudio,
     warmup,
   } = useStrudel()
 
@@ -210,6 +211,9 @@ export function useTransport({
   const wavExport = useWavExport({
     startWavCapture,
     stopWavCapture,
+    canExportAudio,
+    audioReady,
+    deckState: state.deckState,
     loadedTrack: state.loadedTrack,
     setMsg,
   })
@@ -306,6 +310,7 @@ export function useTransport({
       ...state,
       draftTune: drafts.draftTune,
       exporting: wavExport.exporting,
+      exportHint: wavExport.exportHint,
       installPromptEvent: pwaInstall.installPromptEvent,
     },
     radio,

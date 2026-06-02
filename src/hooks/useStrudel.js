@@ -1,6 +1,6 @@
 // @ts-nocheck — complex audio/recorder refs; typed migration tracked in issue #TS-001
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { encodeStereoWav, getWavCaptureWorkletUrl } from '../utils/wav';
+import { decodeBlobToStereoChunks, encodeStereoWav, loadWavCaptureWorklet } from '../utils/wav';
 
 const EXPECTED_STRUDEL_VERSION = '1.3.0';
 
@@ -49,6 +49,84 @@ function findAudioNode(obj, seen = new Set(), depth = 0) {
   return null;
 }
 
+function attachOutputToGraph(output, ctx, audioRef) {
+  const bass = ctx.createBiquadFilter();
+  bass.type = 'lowshelf';
+  bass.frequency.value = 250;
+
+  const mid = ctx.createBiquadFilter();
+  mid.type = 'peaking';
+  mid.frequency.value = 1200;
+  mid.Q.value = 1;
+
+  const treble = ctx.createBiquadFilter();
+  treble.type = 'highshelf';
+  treble.frequency.value = 3200;
+
+  const gain = ctx.createGain();
+  const analyser = ctx.createAnalyser();
+  analyser.fftSize = 2048;
+  const recDest = ctx.createMediaStreamDestination();
+
+  output.disconnect();
+  output.connect(bass);
+  bass.connect(mid);
+  mid.connect(treble);
+  treble.connect(gain);
+  gain.connect(analyser);
+  analyser.connect(ctx.destination);
+  analyser.connect(recDest);
+
+  audioRef.current = {
+    ...audioRef.current,
+    ctx,
+    output,
+    bass,
+    mid,
+    treble,
+    gain,
+    analyser,
+    recDest,
+    wired: true,
+  };
+}
+
+function installDestinationTap(audioRef, setAudioReady) {
+  if (typeof AudioNode === 'undefined' || audioRef.current.tapInstalled) return;
+  audioRef.current.tapInstalled = true;
+  const origConnect = AudioNode.prototype.connect;
+  audioRef.current.restoreConnect = () => {
+    AudioNode.prototype.connect = origConnect;
+  };
+
+  AudioNode.prototype.connect = function (dest, ...args) {
+    const a = audioRef.current;
+    const isOurNode =
+      this === a.bass || this === a.mid || this === a.treble || this === a.gain || this === a.analyser;
+
+    if (
+      !a.wiring &&
+      !a.wired &&
+      !isOurNode &&
+      dest instanceof AudioDestinationNode &&
+      typeof dest.context?.createGain === 'function'
+    ) {
+      try {
+        a.wiring = true;
+        attachOutputToGraph(this, dest.context, audioRef);
+        setAudioReady(true);
+        return this;
+      } catch {
+        return origConnect.call(this, dest, ...args);
+      } finally {
+        a.wiring = false;
+      }
+    }
+
+    return origConnect.call(this, dest, ...args);
+  };
+}
+
 export function useStrudel() {
   const [ready, setReady] = useState(false);
   const [initializing, setInitializing] = useState(true);
@@ -69,76 +147,48 @@ export function useStrudel() {
     wavProcessor: null,
     wavBuffers: [],
     wavSampleRate: 44100,
+    wavCaptureMode: null,
     wired: false,
+    wiring: false,
+    tapInstalled: false,
+    restoreConnect: null,
   });
 
-  const wireAudio = useCallback((repl) => {
-    if (!repl || audioRef.current.wired) return;
-    try {
-      const ctx =
-        repl?.context ||
-        repl?.audioContext ||
-        repl?.scheduler?.context ||
-        findContext(repl) ||
-        null;
-      if (!ctx?.createGain) return;
+  const wireAudio = useCallback(
+    (repl) => {
+      if (!repl || audioRef.current.wired) return;
+      try {
+        const ctx =
+          repl?.context ||
+          repl?.audioContext ||
+          repl?.scheduler?.context ||
+          findContext(repl) ||
+          null;
+        if (!ctx?.createGain) return;
 
-      const output =
-        repl?.output ||
-        repl?.master ||
-        repl?.audio?.output ||
-        repl?.scheduler?.out ||
-        repl?.scheduler?.output ||
-        findAudioNode(repl);
-      if (!output?.connect || output === ctx.destination) return;
+        const output =
+          repl?.output ||
+          repl?.master ||
+          repl?.audio?.output ||
+          repl?.webaudio?.output ||
+          repl?.scheduler?.out ||
+          repl?.scheduler?.output ||
+          repl?.scheduler?.webaudio?.output ||
+          findAudioNode(repl);
+        if (!output?.connect || output === ctx.destination) return;
 
-      const bass = ctx.createBiquadFilter();
-      bass.type = 'lowshelf';
-      bass.frequency.value = 250;
-
-      const mid = ctx.createBiquadFilter();
-      mid.type = 'peaking';
-      mid.frequency.value = 1200;
-      mid.Q.value = 1;
-
-      const treble = ctx.createBiquadFilter();
-      treble.type = 'highshelf';
-      treble.frequency.value = 3200;
-
-      const gain = ctx.createGain();
-      const analyser = ctx.createAnalyser();
-      analyser.fftSize = 2048;
-      const recDest = ctx.createMediaStreamDestination();
-
-      output.disconnect();
-      output.connect(bass);
-      bass.connect(mid);
-      mid.connect(treble);
-      treble.connect(gain);
-      gain.connect(analyser);
-      analyser.connect(ctx.destination);
-      analyser.connect(recDest);
-
-      audioRef.current = {
-        ...audioRef.current,
-        ctx,
-        output,
-        bass,
-        mid,
-        treble,
-        gain,
-        analyser,
-        recDest,
-        wired: true,
-      };
-      setAudioReady(true);
-    } catch {
-      // Strudel internals vary across versions; keep UI usable when wiring fails.
-    }
-  }, []);
+        attachOutputToGraph(output, ctx, audioRef);
+        setAudioReady(true);
+      } catch {
+        // Strudel internals vary across versions; keep UI usable when wiring fails.
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     let cancelled = false;
+    const audioState = audioRef;
     async function init() {
       try {
         const strudelScript = /** @type {HTMLScriptElement | null} */ (
@@ -171,6 +221,7 @@ export function useStrudel() {
         });
         if (cancelled) return;
         replRef.current = repl;
+        installDestinationTap(audioRef, setAudioReady);
         wireAudio(repl);
         setReady(true);
       } catch (e) {
@@ -201,6 +252,7 @@ export function useStrudel() {
     init();
     return () => {
       cancelled = true;
+      audioRef.current.restoreConnect?.();
     };
   }, [wireAudio]);
 
@@ -274,13 +326,26 @@ export function useStrudel() {
     return true;
   }, []);
 
+  const stopRecording = useCallback(async () => {
+    const recorder = audioRef.current.mediaRecorder;
+    if (!recorder) return null;
+    return new Promise((resolve) => {
+      recorder.onstop = () => {
+        const blob = new Blob(audioRef.current.chunks, { type: recorder.mimeType || 'audio/webm' });
+        audioRef.current.mediaRecorder = null;
+        resolve({ blob, mimeType: recorder.mimeType || 'audio/webm' });
+      };
+      recorder.stop();
+    });
+  }, []);
+
   const startWavCapture = useCallback(async () => {
     if (!audioRef.current.wired && replRef.current) {
       wireAudio(replRef.current);
     }
-    const { ctx, analyser } = audioRef.current;
-    if (!ctx || !analyser) return false;
-    if (audioRef.current.wavProcessor) return true;
+    const { ctx, analyser, recDest } = audioRef.current;
+    if (!ctx) return false;
+    if (audioRef.current.wavCaptureMode) return true;
 
     if (ctx.state === 'suspended') {
       try {
@@ -293,52 +358,78 @@ export function useStrudel() {
     audioRef.current.wavBuffers = [];
     audioRef.current.wavSampleRate = ctx.sampleRate || 44100;
 
-    // Preferred: AudioWorklet (works in all modern browsers).
-    if (ctx.audioWorklet) {
-      try {
-        await ctx.audioWorklet.addModule(getWavCaptureWorkletUrl());
-        const workletNode = new AudioWorkletNode(ctx, 'wav-capture-processor', {
-          numberOfInputs: 1,
-          numberOfOutputs: 1,
-          outputChannelCount: [2],
-        });
-        workletNode.port.onmessage = (e) => {
+    if (analyser) {
+      // Preferred: AudioWorklet (works in all modern browsers).
+      if (ctx.audioWorklet && (await loadWavCaptureWorklet(ctx))) {
+        try {
+          const workletNode = new AudioWorkletNode(ctx, 'wav-capture-processor', {
+            numberOfInputs: 1,
+            numberOfOutputs: 1,
+            outputChannelCount: [2],
+          });
+          workletNode.port.onmessage = (e) => {
+            audioRef.current.wavBuffers.push({
+              left: new Float32Array(e.data.left),
+              right: new Float32Array(e.data.right),
+            });
+          };
+          analyser.connect(workletNode);
+          workletNode.connect(ctx.destination);
+          audioRef.current.wavProcessor = workletNode;
+          audioRef.current.wavCaptureMode = 'worklet';
+          return true;
+        } catch {
+          audioRef.current.wavProcessor = null;
+        }
+      }
+
+      // Legacy: ScriptProcessorNode (deprecated, may be absent in newer browsers).
+      if (ctx.createScriptProcessor) {
+        const processor = ctx.createScriptProcessor(4096, 2, 2);
+        processor.onaudioprocess = (event) => {
+          const inL = event.inputBuffer.getChannelData(0);
+          const inR =
+            event.inputBuffer.numberOfChannels > 1 ? event.inputBuffer.getChannelData(1) : inL;
           audioRef.current.wavBuffers.push({
-            left: new Float32Array(e.data.left),
-            right: new Float32Array(e.data.right),
+            left: new Float32Array(inL),
+            right: new Float32Array(inR),
           });
         };
-        analyser.connect(workletNode);
-        workletNode.connect(ctx.destination);
-        audioRef.current.wavProcessor = workletNode;
+        analyser.connect(processor);
+        processor.connect(ctx.destination);
+        audioRef.current.wavProcessor = processor;
+        audioRef.current.wavCaptureMode = 'script';
         return true;
-      } catch {
-        // fall through to legacy path
       }
     }
 
-    // Legacy: ScriptProcessorNode (deprecated, may be absent in newer browsers).
-    if (ctx.createScriptProcessor) {
-      const processor = ctx.createScriptProcessor(4096, 2, 2);
-      processor.onaudioprocess = (event) => {
-        const inL = event.inputBuffer.getChannelData(0);
-        const inR =
-          event.inputBuffer.numberOfChannels > 1 ? event.inputBuffer.getChannelData(1) : inL;
-        audioRef.current.wavBuffers.push({
-          left: new Float32Array(inL),
-          right: new Float32Array(inR),
-        });
-      };
-      analyser.connect(processor);
-      processor.connect(ctx.destination);
-      audioRef.current.wavProcessor = processor;
-      return true;
+    // Fallback: MediaRecorder on the EQ/master tap (requires wired recDest).
+    if (recDest && typeof MediaRecorder !== 'undefined') {
+      const started = startRecording();
+      if (started) {
+        audioRef.current.wavCaptureMode = 'mediarecorder';
+        return true;
+      }
     }
 
     return false;
-  }, [wireAudio]);
+  }, [startRecording, wireAudio]);
 
-  const stopWavCapture = useCallback(() => {
+  const stopWavCapture = useCallback(async () => {
+    const mode = audioRef.current.wavCaptureMode;
+    if (!mode) return null;
+    audioRef.current.wavCaptureMode = null;
+
+    if (mode === 'mediarecorder') {
+      const recorded = await stopRecording();
+      if (!recorded?.blob?.size) return null;
+      const decoded = await decodeBlobToStereoChunks(recorded.blob);
+      if (!decoded?.chunks?.length) return null;
+      const blob = encodeStereoWav(decoded.chunks, decoded.sampleRate);
+      if (!blob) return null;
+      return { blob, mimeType: 'audio/wav' };
+    }
+
     const processor = audioRef.current.wavProcessor;
     if (!processor) return null;
     processor.disconnect();
@@ -357,19 +448,14 @@ export function useStrudel() {
     const blob = encodeStereoWav(chunks, sampleRate);
     if (!blob) return null;
     return { blob, mimeType: 'audio/wav' };
-  }, []);
+  }, [stopRecording]);
 
-  const stopRecording = useCallback(async () => {
-    const recorder = audioRef.current.mediaRecorder;
-    if (!recorder) return null;
-    return new Promise((resolve) => {
-      recorder.onstop = () => {
-        const blob = new Blob(audioRef.current.chunks, { type: recorder.mimeType || 'audio/webm' });
-        audioRef.current.mediaRecorder = null;
-        resolve({ blob, mimeType: recorder.mimeType || 'audio/webm' });
-      };
-      recorder.stop();
-    });
+  const canExportAudio = useCallback(() => {
+    const { ctx, analyser, recDest, wired } = audioRef.current;
+    if (!ctx) return false;
+    if (wired && analyser) return true;
+    if (wired && recDest && typeof MediaRecorder !== 'undefined') return true;
+    return false;
   }, []);
 
   const warmup = useCallback(
@@ -407,6 +493,7 @@ export function useStrudel() {
     stopRecording,
     startWavCapture,
     stopWavCapture,
+    canExportAudio,
     warmup,
   };
 }

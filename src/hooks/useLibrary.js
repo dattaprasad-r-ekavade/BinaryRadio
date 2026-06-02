@@ -3,6 +3,7 @@ import { tracks as staticTracks } from '../data/tracks'
 import { useLocalStorage } from './useLocalStorage'
 import { toggleFavorite } from '../utils/playlist'
 import { isValidManifestTrack, normalizeTrack } from '../utils/tunePipeline'
+import { resolvePublicUrl } from '../utils/publicUrl'
 
 export function useLibrary() {
   const [manifestTracks, setManifestTracks] = useState(staticTracks.map(normalizeTrack))
@@ -11,7 +12,7 @@ export function useLibrary() {
   const [onlyFavorites, setOnlyFavorites] = useState(false)
 
   useEffect(() => {
-    fetch('/tunes/manifest.json')
+    fetch(resolvePublicUrl('/tunes/manifest.json'))
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         if (!Array.isArray(data) || !data.length) return

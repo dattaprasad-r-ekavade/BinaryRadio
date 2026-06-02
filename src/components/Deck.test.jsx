@@ -29,7 +29,9 @@ const baseProps = {
   onEq: vi.fn(),
   onExport: vi.fn(),
   exporting: false,
+  exportHint: 'hint',
   audioReady: true,
+  deckState: 'stopped',
 }
 
 describe('Deck', () => {
@@ -51,6 +53,17 @@ describe('Deck', () => {
     const pauseBtn = screen.getByRole('button', { name: /pause/i })
     fireEvent.click(pauseBtn)
     expect(baseProps.onPause).toHaveBeenCalled()
+  })
+
+  it('shows export steps when a track is loaded', () => {
+    render(
+      <Deck
+        {...baseProps}
+        track={{ id: 't1', title: 'Test', description: 'desc', bpm: 100, key: 'Am', durationSec: 60, moodTags: ['x'], emoji: '🎵' }}
+      />,
+    )
+    expect(screen.getAllByRole('note', { name: /wav export instructions/i }).length).toBeGreaterThan(0)
+    expect(screen.getAllByRole('button', { name: /start rec/i }).length).toBeGreaterThan(0)
   })
 
   it('keeps RJ radio toggle enabled when engine is ready even if audio graph is not ready', () => {
