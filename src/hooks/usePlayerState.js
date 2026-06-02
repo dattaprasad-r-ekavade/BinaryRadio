@@ -76,6 +76,7 @@ export function usePlayerState() {
     },
     ui: {
       theme,
+      resolvedTheme: transport.resolvedTheme,
       engineState: transport.engineState,
       engineLabel: transport.engineLabel,
       showEditor: transport.state.showEditor,

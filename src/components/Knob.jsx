@@ -23,8 +23,8 @@ export default function Knob({
   min = 0,
   max = 1,
   onChange,
-  trackColor = '#00e87a',
-  glowColor = 'rgba(0,232,122,.6)',
+  trackColor = 'var(--green)',
+  glowColor = 'var(--green-glow)',
   dragTitle = '',
   dragDirection = 1,
 }) {
@@ -112,7 +112,13 @@ export default function Knob({
     >
       <svg width="80" height="80" viewBox="0 0 80 80">
         {bgArc && (
-          <path d={bgArc} fill="none" stroke="#1a1a28" strokeWidth="4.5" strokeLinecap="round" />
+          <path
+            d={bgArc}
+            fill="none"
+            stroke="var(--knob-track-bg)"
+            strokeWidth="4.5"
+            strokeLinecap="round"
+          />
         )}
         {fgArc && (
           <path
@@ -124,8 +130,22 @@ export default function Knob({
             style={{ filter: `drop-shadow(0 0 4px ${glowColor})` }}
           />
         )}
-        <circle cx={cx} cy={cy} r="20" fill="#0e0e18" stroke="#2a2a3c" strokeWidth="2" />
-        <circle cx={cx} cy={cy} r="18" fill="#111120" stroke="#1e1e2e" strokeWidth="1" />
+        <circle
+          cx={cx}
+          cy={cy}
+          r="20"
+          fill="var(--knob-face)"
+          stroke="var(--knob-face-stroke)"
+          strokeWidth="2"
+        />
+        <circle
+          cx={cx}
+          cy={cy}
+          r="18"
+          fill="var(--knob-face-inner)"
+          stroke="var(--knob-face-inner-stroke)"
+          strokeWidth="1"
+        />
         <circle
           cx={indX.toFixed(2)}
           cy={indY.toFixed(2)}

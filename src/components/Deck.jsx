@@ -206,8 +206,8 @@ export default function Deck({
             min={0.05}
             max={1.0}
             onChange={onCps}
-            trackColor="#00e87a"
-            glowColor="rgba(0,232,122,.6)"
+            trackColor="var(--green)"
+            glowColor="var(--green-glow)"
             dragTitle="Drag up/down to change tempo"
           />
           <span className="knob-val">{cps.toFixed(2)} cps</span>
@@ -221,8 +221,8 @@ export default function Deck({
             min={0}
             max={1.5}
             onChange={onMasterVolume}
-            trackColor="#4da3ff"
-            glowColor="rgba(77,163,255,.6)"
+            trackColor="var(--blue)"
+            glowColor="var(--blue-glow)"
             dragTitle="Master volume"
           />
           <span className="knob-val">{Math.round(masterVolume * 100)}%</span>
@@ -235,8 +235,8 @@ export default function Deck({
             min={0}
             max={1}
             onChange={onRjVolume}
-            trackColor="#ffb703"
-            glowColor="rgba(255,183,3,.6)"
+            trackColor="var(--amber)"
+            glowColor="var(--amber-glow)"
             dragTitle="Radio DJ volume"
           />
           <span className="knob-val">{Math.round(rjVolume * 100)}%</span>

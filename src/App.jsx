@@ -33,8 +33,13 @@ export default function App() {
           <button className="mini-btn" onClick={() => ui.actions.setShowShortcuts((v) => !v)}>
             Shortcuts
           </button>
-          <button className="mini-btn" onClick={ui.actions.toggleTheme}>
-            Theme
+          <button
+            className="mini-btn"
+            onClick={ui.actions.toggleTheme}
+            aria-pressed={ui.resolvedTheme === 'light'}
+            title={`Switch to ${ui.resolvedTheme === 'light' ? 'dark' : 'light'} mode`}
+          >
+            {ui.resolvedTheme === 'light' ? 'Dark' : 'Light'}
           </button>
           {ui.installPromptEvent && (
             <button className="mini-btn" onClick={ui.actions.install}>

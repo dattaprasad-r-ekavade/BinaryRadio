@@ -7,6 +7,7 @@
 }
 
 :root {
+  color-scheme: dark;
   --bg: #090910;
   --bg2: #0d0d16;
   --bg3: #12121e;
@@ -21,11 +22,49 @@
   --amber: #ffa800;
   --red: #ff2244;
   --blue: #2277ff;
+  --surface: #07070d;
+  --surface-deep: #06060c;
+  --deck-accent-border: #1e1e2e;
+  --shadow-elevated: 0 10px 40px rgba(0, 0, 0, 0.5);
+  --shadow-panel: 0 6px 24px rgba(0, 0, 0, 0.3);
+  --inset-highlight: rgba(255, 255, 255, 0.03);
+  --btn-inset-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.5);
+  --btn-top-highlight: 0 1px 0 rgba(255, 255, 255, 0.02);
+  --btn-hover-border: rgba(255, 255, 255, 0.12);
+  --pill-bg: rgba(0, 0, 0, 0.2);
+  --accent-green-bg: rgba(0, 232, 122, 0.08);
+  --accent-green-bg-strong: rgba(0, 232, 122, 0.1);
+  --accent-green-glow: rgba(0, 232, 122, 0.18);
+  --accent-green-border: rgba(0, 232, 122, 0.45);
+  --accent-green-fill: rgba(0, 232, 122, 0.06);
+  --accent-green-fill-soft: rgba(0, 232, 122, 0.04);
+  --accent-amber-bg: rgba(255, 168, 0, 0.1);
+  --accent-blue-bg: rgba(34, 119, 255, 0.07);
+  --accent-amber-msg-bg: rgba(255, 168, 0, 0.07);
+  --accent-amber-msg-border: rgba(255, 168, 0, 0.2);
+  --accent-red-msg-bg: rgba(255, 34, 68, 0.07);
+  --accent-red-msg-border: rgba(255, 34, 68, 0.2);
+  --logo-glow: rgba(0, 232, 122, 0.3);
+  --brand-glow: rgba(0, 232, 122, 0.25);
+  --green-glow: rgba(0, 232, 122, 0.6);
+  --blue-glow: rgba(77, 163, 255, 0.6);
+  --amber-glow: rgba(255, 183, 3, 0.6);
+  --knob-track-bg: #1a1a28;
+  --knob-face: #0e0e18;
+  --knob-face-stroke: #2a2a3c;
+  --knob-face-inner: #111120;
+  --knob-face-inner-stroke: #1e1e2e;
+  --viz-idle: rgba(90, 88, 122, 0.22);
+  --viz-fill: rgba(0, 232, 122, 0.22);
+  --viz-hot: #ff7a4b;
+  --viz-mid: #ffb703;
+  --body-glow: rgba(34, 119, 255, 0.05);
   --mono: 'Space Mono', 'Courier New', monospace;
   --r: 6px;
 }
 
 :root[data-theme='light'] {
+  color-scheme: light;
   --bg: #f2f5f8;
   --bg2: #ebf0f5;
   --bg3: #e6ecf2;
@@ -40,6 +79,43 @@
   --amber: #b45309;
   --red: #b91c1c;
   --blue: #1d4ed8;
+  --surface: #e6ecf2;
+  --surface-deep: #ebf0f5;
+  --deck-accent-border: #c9d3df;
+  --shadow-elevated: 0 10px 32px rgba(15, 23, 42, 0.1);
+  --shadow-panel: 0 6px 20px rgba(15, 23, 42, 0.08);
+  --inset-highlight: rgba(255, 255, 255, 0.65);
+  --btn-inset-shadow: inset 0 -1px 0 rgba(15, 23, 42, 0.08);
+  --btn-top-highlight: 0 1px 0 rgba(255, 255, 255, 0.9);
+  --btn-hover-border: #94a3b8;
+  --pill-bg: rgba(15, 23, 42, 0.06);
+  --accent-green-bg: color-mix(in srgb, var(--green) 14%, transparent);
+  --accent-green-bg-strong: color-mix(in srgb, var(--green) 16%, transparent);
+  --accent-green-glow: color-mix(in srgb, var(--green) 22%, transparent);
+  --accent-green-border: color-mix(in srgb, var(--green) 55%, transparent);
+  --accent-green-fill: color-mix(in srgb, var(--green) 10%, transparent);
+  --accent-green-fill-soft: color-mix(in srgb, var(--green) 8%, transparent);
+  --accent-amber-bg: color-mix(in srgb, var(--amber) 14%, transparent);
+  --accent-blue-bg: color-mix(in srgb, var(--blue) 12%, transparent);
+  --accent-amber-msg-bg: color-mix(in srgb, var(--amber) 12%, transparent);
+  --accent-amber-msg-border: color-mix(in srgb, var(--amber) 35%, transparent);
+  --accent-red-msg-bg: color-mix(in srgb, var(--red) 10%, transparent);
+  --accent-red-msg-border: color-mix(in srgb, var(--red) 30%, transparent);
+  --logo-glow: color-mix(in srgb, var(--green) 35%, transparent);
+  --brand-glow: color-mix(in srgb, var(--green) 30%, transparent);
+  --green-glow: color-mix(in srgb, var(--green) 50%, transparent);
+  --blue-glow: color-mix(in srgb, var(--blue) 45%, transparent);
+  --amber-glow: color-mix(in srgb, var(--amber) 45%, transparent);
+  --knob-track-bg: #c9d3df;
+  --knob-face: #f7fafc;
+  --knob-face-stroke: #c9d3df;
+  --knob-face-inner: #f1f5f9;
+  --knob-face-inner-stroke: #dbe4ee;
+  --viz-idle: color-mix(in srgb, var(--dim) 28%, transparent);
+  --viz-fill: color-mix(in srgb, var(--green) 28%, transparent);
+  --viz-hot: #ea580c;
+  --viz-mid: #d97706;
+  --body-glow: color-mix(in srgb, var(--blue) 10%, transparent);
 }
 
 html,
@@ -54,7 +130,7 @@ body {
 body {
   background-image: radial-gradient(
     ellipse 60% 25% at 50% -2%,
-    rgba(34, 119, 255, 0.05) 0%,
+    var(--body-glow) 0%,
     transparent 60%
   );
 }

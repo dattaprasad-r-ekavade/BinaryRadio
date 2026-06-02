@@ -87,6 +87,16 @@ export function useTransport({
   }, [resolveTheme])
 
   useEffect(() => {
+    if (theme !== 'system' || !window.matchMedia) return undefined
+    const mq = window.matchMedia('(prefers-color-scheme: light)')
+    const apply = () => {
+      document.documentElement.setAttribute('data-theme', mq.matches ? 'light' : 'dark')
+    }
+    mq.addEventListener('change', apply)
+    return () => mq.removeEventListener('change', apply)
+  }, [theme])
+
+  useEffect(() => {
     if (!audioReady) return
     setMasterVolume(masterVolume)
   }, [audioReady, masterVolume, setMasterVolume])
@@ -285,8 +295,11 @@ export function useTransport({
   const engineState = initializing ? 'wait' : error ? 'err' : ready ? 'ok' : 'wait'
   const engineLabel = initializing ? 'LOADING…' : error ? 'ENGINE ERROR' : ready ? 'ENGINE READY' : 'OFFLINE'
 
+  const resolvedTheme = resolveTheme()
+
   return {
     ready,
+    resolvedTheme,
     audioReady,
     analyser: getAnalyser(),
     state: {
