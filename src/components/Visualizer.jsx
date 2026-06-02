@@ -1,10 +1,20 @@
 // @ts-nocheck — canvas/analyser refs; typed migration tracked in issue #TS-001
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import PropTypes from 'prop-types'
+import { readThemeColors } from '../utils/themeColors'
 import './Visualizer.css'
 
 export default function Visualizer({ analyser, mode, playing }) {
   const canvasRef = useRef(null)
+  const [themeColors, setThemeColors] = useState(readThemeColors)
+
+  useEffect(() => {
+    const sync = () => setThemeColors(readThemeColors())
+    sync()
+    const observer = new MutationObserver(sync)
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
+    return () => observer.disconnect()
+  }, [])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -23,7 +33,7 @@ export default function Visualizer({ analyser, mode, playing }) {
       ctx.clearRect(0, 0, width, height)
       if (fakeMode === 'waveform') {
         ctx.lineWidth = 2
-        ctx.strokeStyle = '#00e87a'
+        ctx.strokeStyle = themeColors.green
         ctx.beginPath()
         const points = 120
         for (let i = 0; i < points; i += 1) {
@@ -35,7 +45,7 @@ export default function Visualizer({ analyser, mode, playing }) {
         }
         ctx.stroke()
       } else {
-        ctx.fillStyle = 'rgba(0,232,122,.22)'
+        ctx.fillStyle = themeColors.vizFill
         const bars = 30
         for (let i = 0; i < bars; i += 1) {
           const phase = t / 180 + i * 0.28
@@ -69,7 +79,7 @@ export default function Visualizer({ analyser, mode, playing }) {
       ctx.clearRect(0, 0, width, height)
 
       if (!playing) {
-        ctx.fillStyle = 'rgba(90,88,122,.22)'
+        ctx.fillStyle = themeColors.vizIdle
         ctx.fillRect(0, height - 6, width, 6)
         raf = requestAnimationFrame(draw)
         return
@@ -89,13 +99,13 @@ export default function Visualizer({ analyser, mode, playing }) {
         for (let i = 0; i < bars; i += 1) {
           const v = freqData[i * step] / 255
           const bh = Math.max(2, v * height)
-          ctx.fillStyle = i > 42 ? '#ff7a4b' : i > 28 ? '#ffb703' : '#00e87a'
+          ctx.fillStyle = i > 42 ? themeColors.vizHot : i > 28 ? themeColors.vizMid : themeColors.green
           ctx.fillRect(i * bw + 1, height - bh, Math.max(1, bw - 2), bh)
         }
       } else {
         analyser.getByteTimeDomainData(timeData)
         ctx.lineWidth = 2
-        ctx.strokeStyle = '#00e87a'
+        ctx.strokeStyle = themeColors.green
         ctx.beginPath()
         for (let i = 0; i < timeData.length; i += 1) {
           const x = (i / (timeData.length - 1)) * width
@@ -113,7 +123,7 @@ export default function Visualizer({ analyser, mode, playing }) {
     return () => {
       if (raf) cancelAnimationFrame(raf)
     }
-  }, [analyser, mode, playing])
+  }, [analyser, mode, playing, themeColors])
 
   return <canvas ref={canvasRef} className="viz-canvas" aria-label="Audio visualizer" />
 }

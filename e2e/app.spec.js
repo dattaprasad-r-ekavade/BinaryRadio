@@ -75,7 +75,8 @@ test('theme toggle persists across reload', async ({ page }) => {
   const html = page.locator('html')
   const initialTheme = await html.getAttribute('data-theme')
 
-  await page.getByRole('button', { name: 'Theme' }).click()
+  const themeBtn = page.getByRole('button', { name: /^(Light|Dark)$/ })
+  await themeBtn.click()
   const changedTheme = await html.getAttribute('data-theme')
   expect(changedTheme).not.toBe(initialTheme)
 

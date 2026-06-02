@@ -1,12 +1,10 @@
 .deck {
   background: var(--panel);
   border: 1px solid var(--border);
-  border-top: 2px solid #1e1e2e;
+  border-top: 2px solid var(--deck-accent-border);
   border-radius: var(--r);
   overflow: hidden;
-  box-shadow:
-    0 10px 40px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  box-shadow: var(--shadow-elevated), inset 0 1px 0 var(--inset-highlight);
 }
 
 .deck-brand {
@@ -14,7 +12,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 4px 16px;
-  background: #07070d;
+  background: var(--surface);
   border-bottom: 1px solid var(--border);
   font-size: 0.55rem;
   letter-spacing: 0.2em;
@@ -22,7 +20,7 @@
 
 .deck-brand-name {
   color: var(--green);
-  text-shadow: 0 0 8px rgba(0, 232, 122, 0.25);
+  text-shadow: 0 0 8px var(--brand-glow);
 }
 
 .deck-brand-model {
@@ -33,7 +31,7 @@
   position: relative;
   height: 92px;
   border-bottom: 1px solid var(--border);
-  background: #06060c;
+  background: var(--surface-deep);
 }
 
 .viz-mode {
@@ -49,7 +47,7 @@
   align-items: center;
   gap: 16px;
   padding: 14px 18px;
-  background: #06060c;
+  background: var(--surface-deep);
   border-bottom: 1px solid var(--border);
   min-height: 118px;
 }
@@ -121,7 +119,7 @@
   border-radius: 999px;
   border: 1px solid var(--border);
   color: var(--dim);
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--pill-bg);
 }
 
 .deck-state {
@@ -136,14 +134,14 @@
 
 .deck-state--playing {
   color: var(--green);
-  background: rgba(0, 232, 122, 0.1);
-  box-shadow: 0 0 8px rgba(0, 232, 122, 0.18);
+  background: var(--accent-green-bg-strong);
+  box-shadow: 0 0 8px var(--accent-green-glow);
   animation: rec-blink 1.4s step-end infinite;
 }
 
 .deck-state--paused {
   color: var(--amber);
-  background: rgba(255, 168, 0, 0.1);
+  background: var(--accent-amber-bg);
 }
 
 @keyframes rec-blink {
@@ -173,7 +171,7 @@
   flex-direction: column;
   gap: 3px;
   padding: 7px 18px;
-  background: #07070d;
+  background: var(--surface);
   border-bottom: 1px solid var(--border);
 }
 
@@ -204,14 +202,12 @@
     border-color 0.1s,
     color 0.1s,
     box-shadow 0.1s;
-  box-shadow:
-    inset 0 -2px 0 rgba(0, 0, 0, 0.5),
-    0 1px 0 rgba(255, 255, 255, 0.02);
+  box-shadow: var(--btn-inset-shadow), var(--btn-top-highlight);
 }
 
 .tbtn:hover:not(:disabled) {
   background: var(--bg4);
-  border-color: rgba(255, 255, 255, 0.12);
+  border-color: var(--btn-hover-border);
   color: var(--text);
 }
 
@@ -234,13 +230,13 @@
 .tbtn--active {
   border-color: var(--green);
   color: var(--green);
-  background: rgba(0, 232, 122, 0.06);
+  background: var(--accent-green-fill);
 }
 
 .tbtn--loop.tbtn--active {
   border-color: var(--blue);
   color: var(--blue);
-  background: rgba(34, 119, 255, 0.07);
+  background: var(--accent-blue-bg);
 }
 
 .tbtn--hidden {
@@ -252,7 +248,7 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
   padding: 8px 12px;
-  background: #07070d;
+  background: var(--surface);
   border-bottom: 1px solid var(--border);
 }
 
@@ -288,7 +284,7 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
   padding: 8px 12px;
-  background: #07070d;
+  background: var(--surface);
 }
 
 .eq-strip label {
@@ -305,6 +301,7 @@
 
 .eq-strip input {
   width: 100%;
+  accent-color: var(--blue);
 }
 
 @media (max-width: 860px) {

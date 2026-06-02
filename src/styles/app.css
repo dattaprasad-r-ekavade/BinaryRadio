@@ -29,7 +29,7 @@
   font-size: 1.15rem;
   letter-spacing: 0.22em;
   color: var(--green);
-  text-shadow: 0 0 14px rgba(0, 232, 122, 0.3);
+  text-shadow: 0 0 14px var(--logo-glow);
 }
 
 .hd-tools {
@@ -53,7 +53,7 @@
 .mini-btn--on {
   border-color: var(--green);
   color: var(--green);
-  background: rgba(0, 232, 122, 0.08);
+  background: var(--accent-green-bg);
 }
 
 button:focus-visible,
@@ -113,23 +113,23 @@ textarea:focus-visible,
 }
 
 .app-msg--wait {
-  background: rgba(255, 168, 0, 0.07);
+  background: var(--accent-amber-msg-bg);
   color: var(--amber);
-  border: 1px solid rgba(255, 168, 0, 0.2);
+  border: 1px solid var(--accent-amber-msg-border);
 }
 
 .app-msg--err {
-  background: rgba(255, 34, 68, 0.07);
+  background: var(--accent-red-msg-bg);
   color: var(--red);
-  border: 1px solid rgba(255, 34, 68, 0.2);
+  border: 1px solid var(--accent-red-msg-border);
 }
 
 .play-hint {
   font-size: 0.75rem;
   padding: 9px 22px;
   border-radius: var(--r);
-  border: 1px dashed rgba(0, 232, 122, 0.45);
-  background: rgba(0, 232, 122, 0.04);
+  border: 1px dashed var(--accent-green-border);
+  background: var(--accent-green-fill-soft);
   color: var(--green);
   letter-spacing: 0.08em;
 }
