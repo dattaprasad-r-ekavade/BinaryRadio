@@ -64,6 +64,7 @@ export function useTransport({
     setMasterVolume,
     setEq,
     getAnalyser,
+    getChannelAnalysers,
     startWavCapture,
     stopWavCapture,
     canExportAudio,
@@ -312,6 +313,7 @@ export function useTransport({
     resolvedTheme,
     audioReady,
     analyser: getAnalyser(),
+    channelAnalysers: getChannelAnalysers(),
     state: {
       ...state,
       draftTune: drafts.draftTune,

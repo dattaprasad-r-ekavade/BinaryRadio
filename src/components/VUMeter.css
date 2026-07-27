@@ -1,54 +1,69 @@
 .vu {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: var(--sp-2);
 }
 
 .vu-ch {
-  font-size: 0.52rem;
-  color: var(--dimmer);
-  width: 10px;
+  font-size: var(--fs-2xs);
+  color: var(--dim);
+  width: 12px;
   flex-shrink: 0;
+  text-align: center;
 }
 
 .vu-bars {
+  position: relative;
   display: flex;
   gap: 2px;
   flex: 1;
-  height: 7px;
+  height: 10px;
+  padding: 1px;
+  border-radius: 2px;
+  background: var(--surface-deep);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
+/* Unlit segments are visible but clearly off, so an idle meter reads as a
+   meter at rest rather than as a row of broken dashes. */
 .vu-b {
   flex: 1;
-  height: 7px;
   border-radius: 1px;
-  background: var(--bg4);
+  background: var(--vu-off);
+  transition: background var(--dur-fast) linear;
 }
 
-.vu-b--on {
-  animation: vuf calc(0.1s + var(--i) * 0.016s) ease-in-out infinite alternate;
+.vu-b[data-zone='amber'],
+.vu-b[data-zone='red'] {
+  background: var(--vu-off-hot);
 }
 
-.vu-b--on:nth-child(-n + 12) {
+.vu-b--on[data-zone='green'] {
   background: var(--green);
-  box-shadow: 0 0 3px var(--green2);
+  box-shadow: 0 0 4px var(--green2);
 }
 
-.vu-b--on:nth-child(n + 13):nth-child(-n + 16) {
+.vu-b--on[data-zone='amber'] {
   background: var(--amber);
-  box-shadow: 0 0 3px var(--amber);
+  box-shadow: 0 0 4px var(--amber);
 }
 
-.vu-b--on:nth-child(n + 17) {
+.vu-b--on[data-zone='red'] {
   background: var(--red);
-  box-shadow: 0 0 3px var(--red);
+  box-shadow: 0 0 4px var(--red);
 }
 
-@keyframes vuf {
-  from {
-    opacity: calc(0.1 + var(--i) * 0.04);
-  }
-  to {
-    opacity: 1;
-  }
+/* Peak-hold marker: rides the highest recent level and decays slowly. */
+.vu-peak {
+  position: absolute;
+  top: 1px;
+  bottom: 1px;
+  width: 2px;
+  left: calc(var(--peak, 0) * 100%);
+  transform: translateX(-2px);
+  background: var(--text);
+  border-radius: 1px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur) var(--ease);
 }

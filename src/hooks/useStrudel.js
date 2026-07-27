@@ -74,6 +74,17 @@ function attachOutputToGraph(output, ctx, audioRef) {
   analyser.fftSize = 2048;
   const recDest = ctx.createMediaStreamDestination();
 
+  /* Per-channel analysers feed the VU meters. Small FFT + heavy smoothing:
+     the meters only need a level, not spectral detail, and this keeps the
+     per-frame Uint8Array reads cheap. */
+  const splitter = ctx.createChannelSplitter(2);
+  const analyserL = ctx.createAnalyser();
+  const analyserR = ctx.createAnalyser();
+  for (const a of [analyserL, analyserR]) {
+    a.fftSize = 256;
+    a.smoothingTimeConstant = 0.6;
+  }
+
   output.disconnect();
   output.connect(bass);
   bass.connect(mid);
@@ -82,6 +93,10 @@ function attachOutputToGraph(output, ctx, audioRef) {
   gain.connect(analyser);
   analyser.connect(ctx.destination);
   analyser.connect(recDest);
+
+  analyser.connect(splitter);
+  splitter.connect(analyserL, 0);
+  splitter.connect(analyserR, 1);
 
   audioRef.current = {
     ...audioRef.current,
@@ -92,6 +107,9 @@ function attachOutputToGraph(output, ctx, audioRef) {
     treble,
     gain,
     analyser,
+    splitter,
+    analyserL,
+    analyserR,
     recDest,
     wired: true,
   };
@@ -108,7 +126,12 @@ function installDestinationTap(audioRef, setAudioReady) {
   AudioNode.prototype.connect = function (dest, ...args) {
     const a = audioRef.current;
     const isOurNode =
-      this === a.bass || this === a.mid || this === a.treble || this === a.gain || this === a.analyser;
+      this === a.bass ||
+      this === a.mid ||
+      this === a.treble ||
+      this === a.gain ||
+      this === a.analyser ||
+      this === a.splitter;
 
     if (
       !a.wiring &&
@@ -147,6 +170,9 @@ export function useStrudel() {
     mid: null,
     treble: null,
     analyser: null,
+    splitter: null,
+    analyserL: null,
+    analyserR: null,
     recDest: null,
     mediaRecorder: null,
     chunks: [],
@@ -313,6 +339,12 @@ export function useStrudel() {
   }, []);
 
   const getAnalyser = useCallback(() => audioRef.current.analyser, []);
+
+  /** Per-channel analysers for the VU meters (null until the graph is wired). */
+  const getChannelAnalysers = useCallback(
+    () => ({ left: audioRef.current.analyserL ?? null, right: audioRef.current.analyserR ?? null }),
+    [],
+  );
 
   const startRecording = useCallback(() => {
     const recDest = audioRef.current.recDest;
@@ -586,6 +618,7 @@ export function useStrudel() {
     setMasterVolume,
     setEq,
     getAnalyser,
+    getChannelAnalysers,
     startRecording,
     stopRecording,
     startWavCapture,

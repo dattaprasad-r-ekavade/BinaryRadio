@@ -42,6 +42,7 @@ export function usePlayerState() {
       exportHint: transport.state.exportHint,
       radio: transport.radio,
       analyser: transport.analyser,
+      channelAnalysers: transport.channelAnalysers,
       actions: {
         setRjVolume: transport.actions.setRjVolume,
         setVisualMode: transport.actions.setVisualMode,
