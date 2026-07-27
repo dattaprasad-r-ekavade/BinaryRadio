@@ -132,7 +132,7 @@ async function main() {
 
     // ── 5. Start MediaRecorder capture ────────────────────────────────────────
     console.log('Starting capture...')
-    await page.evaluate(() => window.__startCapture())
+    await page.evaluate(() => window.__startCapture?.())
     await sleep(500)
 
     // ── 6. Record ─────────────────────────────────────────────────────────────
@@ -141,7 +141,7 @@ async function main() {
 
     // ── 7. Stop and retrieve base64 audio data ────────────────────────────────
     console.log('Stopping capture...')
-    const dataUrl = await page.evaluate(() => window.__stopCapture())
+    const dataUrl = await page.evaluate(() => window.__stopCapture?.())
     if (!dataUrl) throw new Error('No audio data captured.')
 
     // ── 8. Write WebM temp file ───────────────────────────────────────────────

@@ -1,4 +1,4 @@
-import { logExportError } from './exportLog'
+import { logExportError, logExportWarn } from './exportLog'
 import { resolvePublicUrl } from './publicUrl'
 
 /** Resolved URL for the public-folder AudioWorklet used by WAV export. */
