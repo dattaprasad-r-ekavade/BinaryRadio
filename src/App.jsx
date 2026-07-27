@@ -8,6 +8,29 @@ import './App.css'
 
 const TuneEditor = lazy(() => import('./components/TuneEditor'))
 
+/** Wordmark glyph. Was a 📼 emoji, which rendered as tofu wherever the
+ *  platform emoji font lacked it, and could not be themed. */
+function CassetteMark() {
+  return (
+    <svg className="logo-icon" viewBox="0 0 48 32" aria-hidden="true" focusable="false">
+      <rect
+        x="1"
+        y="1"
+        width="46"
+        height="30"
+        rx="4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+      <circle cx="16" cy="15" r="5.5" fill="none" stroke="currentColor" strokeWidth="2" />
+      <circle cx="32" cy="15" r="5.5" fill="none" stroke="currentColor" strokeWidth="2" />
+      <path d="M16 15h16" stroke="currentColor" strokeWidth="2" />
+      <path d="M12 26h24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  )
+}
+
 export default function App() {
   const p = usePlayerState()
   const { transport, library, queue, ui } = p
@@ -23,17 +46,28 @@ export default function App() {
     >
       <header className="app-hd">
         <div className="logo">
-          <span className="logo-icon">📼</span>
+          <CassetteMark />
           <span className="logo-name">SYNTHREEL</span>
         </div>
         <div className="hd-tools">
-          <button className="mini-btn" onClick={() => ui.actions.setShowEditor((v) => !v)}>
+          <button
+            type="button"
+            className={ui.showEditor ? 'mini-btn mini-btn--on' : 'mini-btn'}
+            onClick={() => ui.actions.setShowEditor((v) => !v)}
+            aria-pressed={ui.showEditor}
+          >
             Editor
           </button>
-          <button className="mini-btn" onClick={() => ui.actions.setShowShortcuts((v) => !v)}>
+          <button
+            type="button"
+            className={ui.showShortcuts ? 'mini-btn mini-btn--on' : 'mini-btn'}
+            onClick={() => ui.actions.setShowShortcuts((v) => !v)}
+            aria-pressed={ui.showShortcuts}
+          >
             Shortcuts
           </button>
           <button
+            type="button"
             className="mini-btn"
             onClick={ui.actions.toggleTheme}
             aria-pressed={ui.resolvedTheme === 'light'}
@@ -42,7 +76,7 @@ export default function App() {
             {ui.resolvedTheme === 'light' ? 'Dark' : 'Light'}
           </button>
           {ui.installPromptEvent && (
-            <button className="mini-btn" onClick={ui.actions.install}>
+            <button type="button" className="mini-btn" onClick={ui.actions.install}>
               Install
             </button>
           )}
@@ -66,6 +100,14 @@ export default function App() {
         />
       </Suspense>
 
+      {/* Moved above the deck: as a message *below* the transport it appeared
+          after the controls it was describing, and shifted the layout. */}
+      {transport.msg && (
+        <div className={`app-msg app-msg--${transport.msg.type}`} role="status">
+          {transport.msg.text}
+        </div>
+      )}
+
       <Deck
         track={transport.loadedTrack}
         playing={transport.deckState === 'playing'}
@@ -88,6 +130,7 @@ export default function App() {
         visualMode={transport.visualMode}
         onVisualMode={transport.actions.setVisualMode}
         analyser={transport.analyser}
+        channelAnalysers={transport.channelAnalysers}
         masterVolume={ui.masterVolume}
         onMasterVolume={transport.actions.setMasterVolume}
         eq={ui.eq}
@@ -102,14 +145,6 @@ export default function App() {
       <p className="sr-only" aria-live="polite">
         {srStatus}
       </p>
-
-      {transport.msg && <div className={`app-msg app-msg--${transport.msg.type}`}>{transport.msg.text}</div>}
-
-      {transport.loadedCode && transport.deckState !== 'playing' && !transport.loading && (
-        <button className="play-hint" onClick={transport.actions.play} disabled={!transport.ready}>
-          ▶ PLAY — {transport.loadedTrack?.title}
-        </button>
-      )}
 
       <QueuePanel
         queueTracks={queue.tracks}
@@ -140,7 +175,11 @@ export default function App() {
           </a>
         </span>
         <span className="ft-dot">·</span>
-        <a href="https://github.com/dattaprasad-r-ekavade/BinaryRadio" target="_blank" rel="noreferrer">
+        <a
+          href="https://github.com/dattaprasad-r-ekavade/BinaryRadio"
+          target="_blank"
+          rel="noreferrer"
+        >
           Source code
         </a>
         <span className="ft-dot">·</span>

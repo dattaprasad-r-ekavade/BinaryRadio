@@ -8,5 +8,24 @@
   -webkit-user-select: none;
   touch-action: none;
   border-radius: 50%;
-  padding: 4px;
+  padding: var(--sp-1);
+  transition: filter var(--dur) var(--ease);
+}
+
+.knob-wrap:hover,
+.knob-wrap:focus-visible {
+  filter: brightness(1.12);
+}
+
+.knob-wrap svg {
+  display: block;
+  width: 76px;
+  height: 76px;
+}
+
+@media (max-width: 720px) {
+  .knob-wrap svg {
+    width: 64px;
+    height: 64px;
+  }
 }

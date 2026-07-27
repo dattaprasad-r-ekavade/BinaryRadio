@@ -1,25 +1,47 @@
+/* =============================================================================
+   Cassette card
+   -----------------------------------------------------------------------------
+   Structure: a printed label area on top, a mechanism strip beneath.
+   Height is content-driven; the old fixed 5:3 aspect-ratio forced ~2x the
+   height the content needed and made the rack a very long scroll.
+   All colours resolve through tokens so the card re-skins per theme.
+   ========================================================================== */
+
+/* Which per-track colour tints the label. Declared here rather than in
+   variables.css because --cc / --ca are set inline on the card: a var()
+   reference declared on :root would substitute its fallback there and inherit
+   that single literal down to every card. */
+.cas {
+  --cas-label-src: var(--cc, #1b3a60);
+}
+
+/* Light theme tints from the bright --ca accent instead — the --cc shades are
+   authored for dark backgrounds and turn to grey mush when mixed with white. */
+:root[data-theme='light'] .cas {
+  --cas-label-src: var(--ca, #4a88dd);
+}
+
 .cas {
   position: relative;
-  aspect-ratio: 5 / 3;
-  background: #14141e;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--r-sm);
   overflow: hidden;
   cursor: pointer;
   text-align: left;
-  box-shadow:
-    0 3px 14px rgba(0, 0, 0, 0.65),
-    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  background: var(--cas-shell);
+  border: 1px solid var(--cas-shell-border);
+  box-shadow: var(--cas-shadow);
   transition:
-    transform 0.12s,
-    box-shadow 0.14s;
+    transform var(--dur) var(--ease),
+    box-shadow var(--dur) var(--ease);
 }
 
 .cas:hover {
   transform: translateY(-3px);
   box-shadow:
-    0 8px 26px rgba(0, 0, 0, 0.7),
-    0 0 0 1px var(--ca, #4488ff);
+    var(--cas-shadow-hover),
+    0 0 0 1px var(--ca, var(--border-strong));
 }
 
 .cas:focus-visible {
@@ -29,146 +51,190 @@
 
 .cas--loaded {
   box-shadow:
-    0 0 0 2px var(--ca, #4488ff),
-    0 0 18px color-mix(in srgb, var(--ca, #4488ff) 30%, transparent),
-    0 3px 14px rgba(0, 0, 0, 0.6);
+    0 0 0 2px var(--ca, var(--green)),
+    0 0 18px color-mix(in srgb, var(--ca, var(--green)) 30%, transparent),
+    var(--cas-shadow);
 }
 
-.cas-actions {
-  position: absolute;
-  top: 6px;
-  left: 6px;
-  display: flex;
-  gap: 4px;
-  z-index: 2;
-}
+/* ------------------------------------------------------------------- label */
 
-.cas-star,
-.cas-q {
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  background: rgba(0, 0, 0, 0.25);
-  color: #fff;
-  border-radius: 4px;
-  font-size: 0.56rem;
-  line-height: 1;
-  padding: 4px 5px;
-}
-
-.cas-star--on {
-  color: #ffd166;
-  border-color: #ffd166;
-}
-
+/* Dark theme keeps the raw track colour (--cas-label-mix: 100%); light theme
+   mixes it down to a pale printed-label tint over cream stock. */
 .cas-label {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 58%;
-  background: var(--cc, #1b3a60);
-  padding: 6px 8px 6px 52px;
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  overflow: hidden;
+  gap: var(--sp-1);
+  padding: var(--sp-3);
+  padding-right: 76px; /* clears the action buttons in the top-right */
+  background: color-mix(in srgb, var(--cas-label-src) var(--cas-label-mix), var(--cas-label-base));
+  color: var(--cas-ink);
 }
 
-.cas-top {
+.cas-label-head {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 6px;
-  padding-right: 2px;
+  align-items: center;
+  gap: var(--sp-2);
+  min-width: 0;
 }
 
 .cas-emoji {
-  font-size: 0.85rem;
+  font-size: var(--fs-md);
   line-height: 1;
-}
-
-.cas-badge {
-  font-size: 0.44rem;
-  letter-spacing: 0.06em;
-  padding: 1px 5px;
-  border-radius: 6px;
-  background: var(--ca, #4488ff);
-  color: #000;
-  font-weight: 700;
+  flex-shrink: 0;
 }
 
 .cas-name {
-  font-size: 0.68rem;
-  color: rgba(255, 255, 255, 0.9);
-  letter-spacing: 0.05em;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  letter-spacing: var(--ls-tight);
+  color: var(--cas-ink);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.cas-badge {
+  flex-shrink: 0;
+  font-size: 0.625rem;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  padding: 2px var(--sp-2);
+  border-radius: var(--r-pill);
+  background: var(--cas-chip-bg);
+  border: 1px solid var(--cas-chip-border);
+  color: var(--cas-ink);
+}
+
+.cas-badge--playing {
+  background: var(--ca, var(--green));
+  border-color: transparent;
+  color: #06060c;
 }
 
 .cas-desc {
-  font-size: 0.5rem;
-  color: rgba(255, 255, 255, 0.7);
-  line-height: 1.25;
+  font-size: var(--fs-2xs);
+  line-height: 1.4;
+  color: var(--cas-ink-dim);
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
 }
 
 .cas-meta {
-  font-size: 0.48rem;
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.cas-mech {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 42%;
-  background: #0c0c14;
   display: flex;
   align-items: center;
-  padding: 0 5%;
-  gap: 3%;
+  gap: var(--sp-1);
+  margin-top: auto;
+  padding-top: var(--sp-1);
+  font-size: var(--fs-2xs);
+  letter-spacing: 0.06em;
+  color: var(--cas-ink-dim);
+}
+
+.cas-meta-sep {
+  opacity: 0.6;
+}
+
+/* --------------------------------------------------------------- mechanism */
+
+/* Reduced from 42% of a tall card to a fixed strip: it is decoration, so it
+   should not compete with the label for space. */
+.cas-mech {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  height: 34px;
+  padding: 0 var(--sp-3);
+  background: var(--cas-mech);
+  border-top: 1px solid var(--cas-shell-border);
 }
 
 .cas-screw {
-  height: 66%;
-  aspect-ratio: 1;
-  border-radius: 50%;
+  width: 14px;
+  height: 14px;
   flex-shrink: 0;
-  background: #080810;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.cas-screw::after {
-  content: '+';
-  font-size: 0.4rem;
-  color: rgba(255, 255, 255, 0.07);
+  border-radius: 50%;
+  background: var(--cas-screw);
+  box-shadow: inset 0 0 0 1px var(--cas-shell-border);
 }
 
 .cas-win {
   flex: 1;
-  height: 72%;
-  background: #04040a;
-  border-radius: 3px;
-  border: 1px solid #0a0a12;
+  height: 22px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 7%;
-  box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.9);
+  padding: 0 var(--sp-3);
+  border-radius: 2px;
+  background: var(--cas-win);
+  border: 1px solid var(--cas-win-border);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
 .cas-bridge {
-  width: 16%;
+  width: 18%;
   height: 2px;
-  background: linear-gradient(to right, #1a1a22, #3a3a48, #1a1a22);
   border-radius: 1px;
   align-self: flex-end;
-  margin-bottom: 3px;
+  margin-bottom: 4px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--cas-shell-border),
+    transparent
+  );
+}
+
+/* ----------------------------------------------------------------- actions */
+
+.cas-actions {
+  position: absolute;
+  top: var(--sp-2);
+  right: var(--sp-2);
+  display: flex;
+  gap: var(--sp-1);
+}
+
+/* 32px visual box with an invisible 44px hit area, so the buttons meet the
+   minimum target size without dominating the card. */
+.cas-act {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--cas-chip-border);
+  background: var(--cas-chip-bg);
+  color: var(--cas-ink);
+  transition:
+    background var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease),
+    border-color var(--dur-fast) var(--ease);
+}
+
+.cas-act::after {
+  content: '';
+  position: absolute;
+  inset: calc((32px - var(--tap)) / 2);
+}
+
+.cas-act:hover {
+  border-color: var(--cas-ink);
+}
+
+.cas-act--fav {
+  color: #f5a524;
+  border-color: #f5a524;
+}
+
+:root[data-theme='light'] .cas-act--fav {
+  color: #a15c07;
+  border-color: #a15c07;
 }

@@ -5,18 +5,19 @@
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding: 72px 16px 24px;
-  background: color-mix(in srgb, var(--bg) 55%, transparent);
-  backdrop-filter: blur(2px);
+  padding: var(--sp-7) var(--sp-4) var(--sp-5);
+  overflow-y: auto;
+  background: color-mix(in srgb, var(--bg) 72%, transparent);
+  backdrop-filter: blur(3px);
 }
 
 .shortcuts {
-  width: min(420px, 100%);
+  width: min(460px, 100%);
   border: 1px solid var(--border);
   background: var(--panel);
   border-radius: var(--r);
-  padding: 12px 14px;
-  font-size: 0.66rem;
+  padding: var(--sp-4);
+  font-size: var(--fs-xs);
   box-shadow: var(--shadow-elevated);
 }
 
@@ -24,57 +25,65 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 10px;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-3);
+  padding-bottom: var(--sp-3);
+  border-bottom: 1px solid var(--border);
   color: var(--text);
+  font-size: var(--fs-sm);
 }
 
 .shortcuts-list {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--sp-2);
   color: var(--dim);
 }
 
 .shortcuts-list li {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--sp-2);
   flex-wrap: wrap;
 }
 
 .shortcuts-list kbd {
   display: inline-block;
-  min-width: 1.6em;
-  padding: 2px 6px;
-  border-radius: 4px;
+  min-width: 1.8em;
+  padding: 2px var(--sp-2);
+  border-radius: var(--r-sm);
   border: 1px solid var(--border);
+  border-bottom-width: 2px;
   background: var(--bg3);
   color: var(--text);
   font-family: var(--mono);
-  font-size: 0.62rem;
+  font-size: var(--fs-2xs);
   text-align: center;
 }
 
 .shortcuts-subhd {
-  margin: 14px 0 8px;
-  font-size: 0.58rem;
-  letter-spacing: 0.12em;
+  margin: var(--sp-4) 0 var(--sp-2);
+  font-size: var(--fs-2xs);
+  letter-spacing: var(--ls-wide);
   text-transform: uppercase;
   color: var(--amber);
 }
 
 .shortcuts-export-steps {
   margin: 0;
-  padding-left: 1.2rem;
+  padding-left: 1.4rem;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--sp-2);
   color: var(--dim);
+  line-height: 1.5;
 }
 
 .shortcuts-export-steps code {
   font-family: var(--mono);
   font-size: 0.9em;
+  padding: 1px 4px;
+  border-radius: 3px;
+  background: var(--pill-bg);
 }

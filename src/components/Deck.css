@@ -1,4 +1,14 @@
+/* =============================================================================
+   Cassette deck
+   -----------------------------------------------------------------------------
+   Vertical stack of hardware-style strips: model plate → visualizer →
+   tape window → meters → transport → radio → knobs → EQ.
+   Every strip shares the same horizontal padding so the edges line up.
+   ========================================================================== */
+
 .deck {
+  --deck-pad: var(--sp-4);
+
   background: var(--panel);
   border: 1px solid var(--border);
   border-top: 2px solid var(--deck-accent-border);
@@ -7,181 +17,190 @@
   box-shadow: var(--shadow-elevated), inset 0 1px 0 var(--inset-highlight);
 }
 
-.deck-brand {
+/* ------------------------------------------------------------- model plate */
+
+.deck-plate {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 4px 16px;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--deck-pad);
   background: var(--surface);
   border-bottom: 1px solid var(--border);
-  font-size: 0.55rem;
-  letter-spacing: 0.2em;
 }
 
-.deck-brand-name {
-  color: var(--green);
-  text-shadow: 0 0 8px var(--brand-glow);
+.deck-plate-model {
+  font-size: var(--fs-2xs);
+  letter-spacing: var(--ls-wider);
+  color: var(--dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.deck-brand-model {
-  color: var(--dimmer);
+.viz-mode {
+  display: flex;
+  gap: var(--sp-1);
+  flex-shrink: 0;
 }
+
+.viz-mode .mini-btn {
+  min-height: 30px;
+  padding: 0 var(--sp-2);
+  font-size: var(--fs-2xs);
+}
+
+/* -------------------------------------------------------------- visualizer */
 
 .deck-vizwrap {
-  position: relative;
-  height: 92px;
+  height: 108px;
   border-bottom: 1px solid var(--border);
   background: var(--surface-deep);
 }
 
-.viz-mode {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  display: flex;
-  gap: 4px;
-}
+/* ------------------------------------------------------------- tape window */
 
 .deck-win {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 14px 18px;
+  gap: var(--sp-4);
+  padding: var(--sp-4) var(--deck-pad);
   background: var(--surface-deep);
   border-bottom: 1px solid var(--border);
-  min-height: 118px;
+  min-height: 132px;
 }
 
 .deck-info {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
+  gap: var(--sp-1);
   text-align: center;
-  overflow: hidden;
 }
 
 .deck-playing-label {
-  font-size: 0.5rem;
-  letter-spacing: 0.24em;
-  color: var(--green);
-  margin-bottom: 1px;
-}
-
-.deck-emoji {
-  font-size: 1.3rem;
-  line-height: 1;
-}
-
-.deck-track {
-  font-size: 0.85rem;
-  letter-spacing: 0.07em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
-}
-
-.deck-desc {
-  font-size: 0.6rem;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--fs-2xs);
+  letter-spacing: var(--ls-wider);
   color: var(--dim);
 }
 
-.deck-eject-ico {
-  font-size: 1.5rem;
-  opacity: 0.2;
+.deck-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--dimmer);
 }
 
-.deck-idle {
-  font-size: 0.68rem;
-  letter-spacing: 0.18em;
-  color: var(--dimmer);
+.deck-dot--playing {
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+  animation: deck-pulse 1.6s ease-in-out infinite;
 }
 
-.deck-idle-sub {
-  font-size: 0.58rem;
-  color: var(--dimmer);
+.deck-dot--paused {
+  background: var(--amber);
 }
 
-.meta-pills {
-  margin-top: 3px;
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.meta-pills span {
-  font-size: 0.5rem;
-  letter-spacing: 0.04em;
-  padding: 2px 6px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  color: var(--dim);
-  background: var(--pill-bg);
-}
-
-.deck-state {
-  font-size: 0.55rem;
-  letter-spacing: 0.14em;
-  margin-top: 5px;
-  padding: 2px 11px;
-  border-radius: 20px;
-  background: var(--bg4);
-  color: var(--dimmer);
-}
-
-.deck-state--playing {
-  color: var(--green);
-  background: var(--accent-green-bg-strong);
-  box-shadow: 0 0 8px var(--accent-green-glow);
-  animation: rec-blink 1.4s step-end infinite;
-}
-
-.deck-state--paused {
-  color: var(--amber);
-  background: var(--accent-amber-bg);
-}
-
-@keyframes rec-blink {
+@keyframes deck-pulse {
   0%,
   100% {
     opacity: 1;
   }
   50% {
-    opacity: 0.4;
+    opacity: 0.35;
   }
 }
 
-.deck-radio-row {
+.deck-track {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 4px;
+  justify-content: center;
+  gap: var(--sp-2);
+  max-width: 100%;
+  font-size: var(--fs-xl);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: var(--ls-tight);
+  color: var(--text);
 }
 
-.radio-status {
-  font-size: 0.55rem;
+.deck-emoji {
+  font-size: 0.9em;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.deck-desc {
+  font-size: var(--fs-sm);
   color: var(--dim);
 }
+
+.deck-eject-ico {
+  display: block;
+  width: 28px;
+  height: 28px;
+  color: var(--dimmer);
+}
+
+.deck-eject-ico svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.deck-idle {
+  font-size: var(--fs-lg);
+  letter-spacing: var(--ls-wider);
+  color: var(--dim);
+}
+
+.deck-idle-sub {
+  font-size: var(--fs-xs);
+  color: var(--dim);
+}
+
+.meta-pills {
+  margin-top: var(--sp-1);
+  display: flex;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.meta-pills span {
+  font-size: var(--fs-2xs);
+  letter-spacing: 0.04em;
+  padding: 2px var(--sp-2);
+  border-radius: var(--r-pill);
+  border: 1px solid var(--border);
+  color: var(--dim);
+  background: var(--pill-bg);
+}
+
+/* ------------------------------------------------------------------ meters */
 
 .deck-vu {
   display: flex;
   flex-direction: column;
-  gap: 3px;
-  padding: 7px 18px;
+  gap: var(--sp-1);
+  padding: var(--sp-2) var(--deck-pad);
   background: var(--surface);
   border-bottom: 1px solid var(--border);
 }
+
+/* --------------------------------------------------------------- transport */
 
 .deck-transport {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 10px 20px;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--deck-pad);
   background: var(--panel);
   border-bottom: 1px solid var(--border);
 }
@@ -191,41 +210,60 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  width: 62px;
-  height: 62px;
-  border-radius: 4px;
+  gap: var(--sp-1);
+  width: 68px;
+  height: 64px;
+  border-radius: var(--r-sm);
   border: 1px solid var(--border);
   background: var(--bg3);
-  color: var(--dim);
-  transition:
-    background 0.1s,
-    border-color 0.1s,
-    color 0.1s,
-    box-shadow 0.1s;
+  color: var(--text);
   box-shadow: var(--btn-inset-shadow), var(--btn-top-highlight);
+  transition:
+    background var(--dur-fast) var(--ease),
+    border-color var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease),
+    box-shadow var(--dur-fast) var(--ease);
 }
 
 .tbtn:hover:not(:disabled) {
   background: var(--bg4);
   border-color: var(--btn-hover-border);
-  color: var(--text);
 }
 
+.tbtn:active:not(:disabled) {
+  box-shadow: var(--btn-active-shadow);
+}
+
+/* Previously `opacity: .25`, which took the label to roughly 1.5:1 — the
+   disabled transport row was effectively invisible. */
 .tbtn:disabled {
-  opacity: 0.25;
-  cursor: not-allowed;
+  background: var(--bg2);
+  color: var(--dimmer);
+  border-color: var(--border);
+}
+
+.tbtn:disabled .tbtn-lbl {
+  color: var(--dimmer);
 }
 
 .tbtn-ico {
-  font-size: 0.95rem;
-  line-height: 1;
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+
+.tbtn-ico svg {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 .tbtn-lbl {
-  font-size: 0.44rem;
-  letter-spacing: 0.12em;
-  color: var(--dimmer);
+  font-size: var(--fs-2xs);
+  letter-spacing: 0.08em;
+  color: var(--dim);
+  text-align: center;
+  line-height: 1.1;
 }
 
 .tbtn--active {
@@ -234,108 +272,62 @@
   background: var(--accent-green-fill);
 }
 
+.tbtn--active .tbtn-lbl {
+  color: var(--green);
+}
+
 .tbtn--loop.tbtn--active {
   border-color: var(--blue);
   color: var(--blue);
   background: var(--accent-blue-bg);
 }
 
-.tbtn--hidden {
-  display: none !important;
+.tbtn--loop.tbtn--active .tbtn-lbl {
+  color: var(--blue);
 }
 
-.deck-controls-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-  padding: 8px 12px;
-  background: var(--surface);
+.tbtn--rec.tbtn--active {
+  border-color: var(--red);
+  color: var(--red);
+  background: var(--accent-red-msg-bg);
+}
+
+.tbtn--rec.tbtn--active .tbtn-lbl {
+  color: var(--red);
+}
+
+.tbtn--rec.tbtn--active .tbtn-ico {
+  animation: deck-pulse 1.2s step-end infinite;
+}
+
+/* -------------------------------------------------------------- radio row */
+
+.deck-radio-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--deck-pad);
+  background: var(--panel);
   border-bottom: 1px solid var(--border);
 }
 
-.knob-card {
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--bg3);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 8px 6px;
-}
-
-.knob-lbl {
-  font-size: 0.55rem;
-  letter-spacing: 0.14em;
-  color: var(--dimmer);
-}
-
-.knob-val {
-  font-size: 0.8rem;
-  color: var(--amber);
+.radio-status {
+  font-size: var(--fs-xs);
+  color: var(--dim);
   font-variant-numeric: tabular-nums;
 }
 
-.knob-sub {
-  font-size: 0.56rem;
-  color: var(--dim);
-}
-
-.eq-strip {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-  padding: 8px 12px;
-  background: var(--surface);
-}
-
-.eq-strip label {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.eq-strip span {
-  font-size: 0.56rem;
-  color: var(--dim);
-  letter-spacing: 0.12em;
-}
-
-.eq-strip input {
-  width: 100%;
-  accent-color: var(--blue);
-}
-
-@media (max-width: 860px) {
-  .deck-controls-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 600px) {
-  .tbtn {
-    width: 52px;
-    height: 52px;
-  }
-
-  .deck-win {
-    padding: 12px;
-    gap: 12px;
-  }
-
-  .eq-strip {
-    grid-template-columns: 1fr;
-  }
-}
+/* ------------------------------------------------------------- export hint */
 
 .export-hint {
-  margin: 0 12px 12px;
-  padding: 10px 12px;
+  margin: var(--sp-3) var(--deck-pad);
   border: 1px solid var(--border);
   border-radius: var(--r);
   background: var(--surface);
-  font-size: 0.62rem;
+  font-size: var(--fs-xs);
   color: var(--dim);
-  line-height: 1.45;
+  line-height: 1.5;
 }
 
 .export-hint--active {
@@ -343,21 +335,46 @@
   background: var(--accent-amber-msg-bg);
 }
 
+.export-hint-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  cursor: pointer;
+  list-style: none;
+  min-height: 36px;
+}
+
+.export-hint-summary::-webkit-details-marker {
+  display: none;
+}
+
 .export-hint-title {
-  display: block;
-  margin-bottom: 6px;
-  font-size: 0.58rem;
-  letter-spacing: 0.14em;
+  font-size: var(--fs-2xs);
+  letter-spacing: var(--ls-wide);
   text-transform: uppercase;
   color: var(--amber);
 }
 
+.export-hint-state::after {
+  content: ' ▾';
+}
+
+.export-hint[open] .export-hint-state::after {
+  content: ' ▴';
+}
+
+.export-hint > div {
+  padding: 0 var(--sp-3) var(--sp-3);
+}
+
 .export-hint-steps {
-  margin: 0 0 8px;
-  padding-left: 1.2rem;
+  margin: 0 0 var(--sp-2);
+  padding-left: 1.4rem;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--sp-1);
 }
 
 .export-hint-step--done {
@@ -369,21 +386,262 @@
 }
 
 .export-hint-warn {
-  margin: 6px 0 0;
+  margin: var(--sp-2) 0 0;
   color: var(--amber);
 }
 
-@media (max-width: 400px) {
-  .deck-transport {
-    gap: 5px;
-    padding: 8px 10px;
+/* ------------------------------------------------------------------- knobs */
+
+.deck-controls-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--deck-pad);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.knob-card {
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  background: var(--bg3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-1);
+  padding: var(--sp-3) var(--sp-2);
+}
+
+.knob-lbl {
+  font-size: var(--fs-2xs);
+  letter-spacing: var(--ls-wide);
+  color: var(--dim);
+}
+
+.knob-val {
+  font-size: var(--fs-lg);
+  color: var(--amber);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.knob-sub {
+  font-size: var(--fs-2xs);
+  color: var(--dim);
+}
+
+/* --------------------------------------------------------------------- EQ */
+
+.eq-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--sp-4);
+  padding: var(--sp-4) var(--deck-pad);
+  background: var(--surface);
+}
+
+.eq-band {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  min-width: 0;
+}
+
+.eq-band-hd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  font-size: var(--fs-2xs);
+  letter-spacing: var(--ls-wide);
+  color: var(--dim);
+  text-transform: uppercase;
+}
+
+.eq-reset {
+  padding: 2px var(--sp-2);
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--amber);
+  font-size: var(--fs-2xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.eq-reset:hover:not(:disabled) {
+  border-color: var(--border-strong);
+  background: var(--pill-bg);
+}
+
+.eq-reset:disabled {
+  color: var(--dim);
+}
+
+/* Track + detent live on a wrapper so the fill and the centre mark can be
+   painted behind a transparent native input. */
+.eq-track {
+  position: relative;
+  height: 26px;
+  display: flex;
+  align-items: center;
+}
+
+.eq-track::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(
+    to right,
+    var(--fader-track) 0,
+    var(--fader-track) var(--lo, 50%),
+    var(--blue) var(--lo, 50%),
+    var(--blue) var(--hi, 50%),
+    var(--fader-track) var(--hi, 50%),
+    var(--fader-track) 100%
+  );
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+/* Centre detent at 0 dB, so "flat" is findable by eye. */
+.eq-detent {
+  position: absolute;
+  left: 50%;
+  top: 2px;
+  bottom: 2px;
+  width: 1px;
+  margin-left: -0.5px;
+  background: var(--fader-tick);
+}
+
+.eq-input {
+  position: relative;
+  width: 100%;
+  height: 26px;
+  margin: 0;
+  background: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.eq-input::-webkit-slider-runnable-track {
+  height: 26px;
+  background: transparent;
+}
+
+.eq-input::-moz-range-track {
+  height: 26px;
+  background: transparent;
+}
+
+.eq-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 26px;
+  border-radius: 3px;
+  border: 1px solid var(--border-strong);
+  background: var(--fader-thumb);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 1px var(--inset-highlight);
+  cursor: grab;
+}
+
+.eq-input::-moz-range-thumb {
+  width: 16px;
+  height: 26px;
+  border-radius: 3px;
+  border: 1px solid var(--border-strong);
+  background: var(--fader-thumb);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 1px var(--inset-highlight);
+  cursor: grab;
+}
+
+.eq-input:active::-webkit-slider-thumb {
+  cursor: grabbing;
+}
+
+.eq-input:active::-moz-range-thumb {
+  cursor: grabbing;
+}
+
+.eq-input:focus-visible {
+  outline: none;
+}
+
+.eq-input:focus-visible::-webkit-slider-thumb {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+}
+
+.eq-input:focus-visible::-moz-range-thumb {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------- responsive */
+
+@media (max-width: 860px) {
+  .eq-strip {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--sp-3);
+  }
+}
+
+@media (max-width: 720px) {
+  .deck {
+    --deck-pad: var(--sp-3);
+  }
+
+  .deck-win {
+    padding: var(--sp-3);
+    gap: var(--sp-2);
+    min-height: 0;
+  }
+
+  .deck-track {
+    font-size: var(--fs-lg);
   }
 
   .deck-vizwrap {
-    height: 72px;
+    height: 84px;
   }
 
+  /* Knobs side by side rather than three full-width blocks that pushed the
+     rack a screen and a half down on a phone. */
   .deck-controls-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--sp-1);
+  }
+
+  .knob-card {
+    padding: var(--sp-2) var(--sp-1);
+  }
+
+  .knob-val {
+    font-size: var(--fs-sm);
+  }
+
+  .eq-strip {
     grid-template-columns: 1fr;
+    gap: var(--sp-3);
+  }
+}
+
+@media (max-width: 420px) {
+  .deck-transport {
+    gap: var(--sp-1);
+    padding: var(--sp-3) var(--sp-2);
+  }
+
+  .tbtn {
+    width: 100%;
+    max-width: 78px;
+    height: 58px;
   }
 }

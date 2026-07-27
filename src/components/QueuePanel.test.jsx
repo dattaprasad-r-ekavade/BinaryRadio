@@ -1,6 +1,6 @@
 // @ts-nocheck — test DOM queries; typed migration tracked in issue #TS-001
-import { fireEvent, render, screen } from '@testing-library/react'
-import { describe, expect, it, vi } from 'vitest'
+import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import QueuePanel from './QueuePanel'
 
 const queueTracks = [
@@ -9,6 +9,8 @@ const queueTracks = [
 ]
 
 describe('QueuePanel', () => {
+  afterEach(() => cleanup())
+
   it('supports reorder, remove and clear operations', () => {
     const onRemove = vi.fn()
     const onMove = vi.fn()
@@ -28,19 +30,43 @@ describe('QueuePanel', () => {
     fireEvent.click(screen.getByRole('button', { name: /clear/i }))
     expect(onClear).toHaveBeenCalledTimes(1)
 
-    const playButtons = screen.getAllByRole('button', { name: /play/i })
-    fireEvent.click(playButtons[0])
+    fireEvent.click(screen.getAllByRole('button', { name: /^play$/i })[0])
     expect(onPlayNow).toHaveBeenCalledWith(0)
 
-    const rows = screen.getAllByText(/^\d+\.\s/i).map((el) => el.closest('.queue-row'))
-    const firstRowButtons = rows[0].querySelectorAll('button')
-    const secondRowButtons = rows[1].querySelectorAll('button')
-
-    // buttons order: up, down, play, remove
-    fireEvent.click(firstRowButtons[3])
+    fireEvent.click(screen.getByRole('button', { name: /remove alpha from queue/i }))
     expect(onRemove).toHaveBeenCalledWith(0)
 
-    fireEvent.click(secondRowButtons[0])
+    fireEvent.click(screen.getByRole('button', { name: /move beta up/i }))
     expect(onMove).toHaveBeenCalledWith(1, 0)
+  })
+
+  it('disables the boundary reorder controls', () => {
+    render(
+      <QueuePanel
+        queueTracks={queueTracks}
+        onRemove={vi.fn()}
+        onMove={vi.fn()}
+        onClear={vi.fn()}
+        onPlayNow={vi.fn()}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: /move alpha up/i })).toBeDisabled()
+    expect(screen.getByRole('button', { name: /move beta down/i })).toBeDisabled()
+  })
+
+  it('shows guidance and disables Clear when the queue is empty', () => {
+    render(
+      <QueuePanel
+        queueTracks={[]}
+        onRemove={vi.fn()}
+        onMove={vi.fn()}
+        onClear={vi.fn()}
+        onPlayNow={vi.fn()}
+      />,
+    )
+
+    expect(screen.getByText(/nothing queued/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /clear/i })).toBeDisabled()
   })
 })

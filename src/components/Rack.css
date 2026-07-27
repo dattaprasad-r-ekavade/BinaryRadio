@@ -2,53 +2,72 @@
   background: var(--bg2);
   border: 1px solid var(--border);
   border-radius: var(--r);
-  padding: 14px;
+  padding: var(--sp-4);
   box-shadow: var(--shadow-panel);
 }
 
-.rack--radio {
+/* Radio mode drives the rack itself, so picking a tape is disabled. The old
+   rule dimmed to 0.35 with no explanation; now it stays readable and the
+   header says why. */
+.rack--radio .rack-grid {
   pointer-events: none;
-  opacity: 0.35;
-  filter: grayscale(0.6);
+  opacity: 0.55;
+  filter: saturate(0.5);
 }
 
 .rack-hd {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
-  margin-bottom: 11px;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-3);
 }
 
 .rack-title {
-  font-size: 0.62rem;
-  letter-spacing: 0.22em;
+  font-size: var(--fs-xs);
+  letter-spacing: var(--ls-wider);
   color: var(--dim);
 }
 
 .rack-tools {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--sp-2);
 }
 
 .rack-count {
-  font-size: 0.58rem;
-  color: var(--dimmer);
+  font-size: var(--fs-2xs);
+  color: var(--dim);
+  white-space: nowrap;
+}
+
+.rack-note {
+  width: 100%;
+  font-size: var(--fs-2xs);
+  color: var(--amber);
 }
 
 .rack-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: var(--sp-3);
 }
 
-@media (max-width: 860px) {
-  .rack-grid {
-    grid-template-columns: repeat(2, 1fr);
+.rack-empty {
+  padding: var(--sp-5) var(--sp-4);
+  text-align: center;
+  font-size: var(--fs-sm);
+  color: var(--dim);
+  border: 1px dashed var(--border);
+  border-radius: var(--r);
+}
+
+@media (max-width: 560px) {
+  .rack {
+    padding: var(--sp-3);
   }
-}
 
-@media (max-width: 400px) {
   .rack-grid {
     grid-template-columns: 1fr;
   }

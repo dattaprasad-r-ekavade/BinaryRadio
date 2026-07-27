@@ -32,8 +32,27 @@ describe('CassetteCard', () => {
 
     expect(screen.getByText('Test Tape')).toBeInTheDocument()
     expect(screen.getByText('Tape description')).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: /test tape tape/i }))
+    fireEvent.click(screen.getByRole('button', { name: /^test tape\. tape description$/i }))
     expect(onClick).toHaveBeenCalledTimes(1)
+  })
+
+  it('exposes load state and per-track action labels to assistive tech', () => {
+    render(
+      <CassetteCard
+        track={track}
+        loaded
+        playing
+        favorite
+        onClick={vi.fn()}
+        onFavorite={vi.fn()}
+        onQueue={vi.fn()}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: /test tape, playing/i })).toBeInTheDocument()
+    const fav = screen.getByRole('button', { name: /remove test tape from favorites/i })
+    expect(fav).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('button', { name: /add test tape to queue/i })).toBeInTheDocument()
   })
 
   it('triggers load with keyboard enter', () => {
@@ -49,7 +68,7 @@ describe('CassetteCard', () => {
         onQueue={vi.fn()}
       />,
     )
-    const card = screen.getByLabelText('Test Tape tape')
+    const card = screen.getByLabelText('Test Tape. Tape description')
     fireEvent.keyDown(card, { key: 'Enter' })
     expect(onClick).toHaveBeenCalledTimes(1)
   })

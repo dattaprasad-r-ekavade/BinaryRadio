@@ -1,15 +1,29 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import PropTypes from 'prop-types'
 import './HelpModal.css'
 
 export default function HelpModal({ open, onClose }) {
+  const closeRef = useRef(/** @type {HTMLButtonElement | null} */ (null))
+  const restoreRef = useRef(/** @type {Element | null} */ (null))
+
   useEffect(() => {
     if (!open) return undefined
     const onKey = (e) => {
       if (e.key === 'Escape') onClose()
     }
     window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
+
+    /* Move focus into the dialog and hand it back on close. Without this the
+       dialog opened with focus still on the page behind it, so keyboard users
+       had to tab through the whole app to reach it. */
+    restoreRef.current = document.activeElement
+    closeRef.current?.focus()
+
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      const previous = restoreRef.current
+      if (previous instanceof HTMLElement) previous.focus()
+    }
   }, [open, onClose])
 
   if (!open) return null
@@ -25,7 +39,7 @@ export default function HelpModal({ open, onClose }) {
       >
         <header className="shortcuts-hd">
           <strong>Keyboard shortcuts</strong>
-          <button className="mini-btn" onClick={onClose} type="button">
+          <button className="mini-btn" onClick={onClose} type="button" ref={closeRef}>
             Close
           </button>
         </header>

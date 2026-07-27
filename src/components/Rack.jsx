@@ -22,14 +22,26 @@ export default function Rack({
         <span className="rack-title">TAPE RACK</span>
         <div className="rack-tools">
           <button
+            type="button"
             className={onlyFavorites ? 'mini-btn mini-btn--on' : 'mini-btn'}
             onClick={onToggleFavorites}
+            aria-pressed={onlyFavorites}
           >
-            Favorites
+            Favorites only
           </button>
-          <span className="rack-count">{filtered.length} tapes</span>
+          <span className="rack-count">
+            {filtered.length} {filtered.length === 1 ? 'tape' : 'tapes'}
+          </span>
         </div>
+        {radioEnabled && (
+          <p className="rack-note">Radio mode is picking tapes — turn it off to choose your own.</p>
+        )}
       </header>
+      {!filtered.length && (
+        <p className="rack-empty">
+          {onlyFavorites ? 'No favorites yet — star a tape to pin it here.' : 'No tapes available.'}
+        </p>
+      )}
       <div className="rack-grid">
         {filtered.map((t) => (
           <CassetteCard
