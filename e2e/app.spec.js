@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { expect, test } from '@playwright/test'
 
-const firstTape = '[role="button"][aria-label$=" tape"]'
+const firstTape = '.rack .cas[role="button"]'
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
@@ -22,7 +22,7 @@ test.beforeEach(async ({ page }) => {
 test('load tune and play creates active audio state', async ({ page, browserName }) => {
   await expect(page.locator('.eng')).toContainText('ENGINE READY', { timeout: 60_000 })
   await page.locator(firstTape).first().click()
-  const playBtn = page.locator('button[title="PLAY"]')
+  const playBtn = page.getByRole('button', { name: 'PLAY', exact: true })
   await expect(playBtn).toBeEnabled({ timeout: 60_000 })
   await playBtn.click()
   if ((await page.locator('.app').getAttribute('data-deck-state')) !== 'playing') {
@@ -38,8 +38,8 @@ test('load tune and play creates active audio state', async ({ page, browserName
 })
 
 test('favorites filter shows only favorited tapes', async ({ page }) => {
-  await page.locator('.cas .cas-star').first().click()
-  await page.getByRole('button', { name: 'Favorites' }).click()
+  await page.locator('.rack .cas').first().getByRole('button', { name: /favorites$/ }).click()
+  await page.getByRole('button', { name: 'Favorites only', exact: true }).click()
   await expect(page.locator('.rack .cas')).toHaveCount(1)
 })
 
@@ -48,7 +48,7 @@ test('keyboard shortcuts for transport and track navigation work', async ({ page
   await page.locator(firstTape).first().click()
   const trackLabel = page.locator('.deck-track')
   await expect(trackLabel).toBeVisible()
-  const playBtn = page.locator('button[title="PLAY"]')
+  const playBtn = page.getByRole('button', { name: 'PLAY', exact: true })
   await expect(playBtn).toBeEnabled({ timeout: 60_000 })
   await playBtn.click()
   await expect(page.locator('.app')).toHaveAttribute('data-deck-state', 'playing')

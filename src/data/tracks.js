@@ -90,4 +90,17 @@ export const tracks = [
     moodTags: ['goa', 'sunset', 'ambient', 'beach'],
     durationSec: 310,
   },
+  {
+    id: 'moonlit-local',
+    title: 'Moonlit Local',
+    file: '/tunes/moonlit-local.md',
+    color: '#171b38',
+    accent: '#8da2ff',
+    emoji: '\u{1F319}',
+    description: 'A late-night train rhythm dissolving into a warm electronic raga',
+    bpm: 102,
+    key: 'Dm',
+    moodTags: ['night', 'raga', 'downtempo', 'original'],
+    durationSec: 324,
+  },
 ];
