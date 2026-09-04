@@ -41,7 +41,7 @@ Subsequent runs can use `npx playwright install chromium` if system libraries ar
 - **SharedWorker**: `index.html` disables `SharedWorker` before Strudel loads (known CDN/browser workaround).
 - **WebKit/Safari**: Strudel may fail to initialize in some environments; Chromium is the supported E2E target.
 - **RJ / Kokoro TTS**: Optional. Pre-generated MP3s in `public/rj/` are used at runtime; `npm run generate-rj` needs a Kokoro server (`python scripts/kokoro_server.py` or `KOKORO_URL`).
-- **Node version**: `.nvmrc` specifies 20; `engines.node` is `>=18`. CI uses Node 20.
+- **Node version**: `.nvmrc` specifies 20; `engines.node` is `>=20`. CI uses Node 20.
 - **No git hooks**: This repo does not use husky or pre-commit hooks.
 
 ### Hello-world manual test

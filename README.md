@@ -2,8 +2,8 @@
 
 [![CI](https://github.com/dattaprasad-r-ekavade/BinaryRadio/actions/workflows/ci.yml/badge.svg)](https://github.com/dattaprasad-r-ekavade/BinaryRadio/actions/workflows/ci.yml)
 [![License: AGPL-3.0-or-later](https://img.shields.io/badge/License-AGPL--3.0--or--later-blue.svg)](LICENSE)
-[![Node >=18](https://img.shields.io/badge/node-%3E%3D18-43853d.svg)](https://nodejs.org/)
-[![Coverage](https://img.shields.io/badge/coverage-81%25-brightgreen)](./coverage/index.html)
+[![Node >=20](https://img.shields.io/badge/node-%3E%3D20-43853d.svg)](https://nodejs.org/)
+[![Coverage](https://img.shields.io/badge/coverage-74%25-brightgreen)](./coverage/index.html)
 
 Retro cassette-deck web app for generative music using [Strudel](https://strudel.cc).
 
@@ -141,7 +141,7 @@ scripts/
 
 ## Project Metadata
 
-- Node: `>=18` (recommended via `.nvmrc` = `20`)
+- Node: `>=20` (pinned via `.nvmrc` = `20`)
 - License: `AGPL-3.0-or-later`
 - Package visibility: this repo is intentionally `"private": true` in `package.json`.
   Distribution is source-first via GitHub rather than npm publishing.

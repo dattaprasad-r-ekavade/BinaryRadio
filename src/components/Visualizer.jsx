@@ -106,9 +106,10 @@ export default function Visualizer({ analyser, mode, playing }) {
 
     const lowEnd =
       (typeof navigator.deviceMemory === 'number' && navigator.deviceMemory <= 4) ||
-      (typeof navigator.hardwareConcurrency === 'number' && navigator.hardwareConcurrency <= 4) ||
-      reducedMotion
-    const frameMs = lowEnd ? 1000 / 30 : 1000 / 60
+      (typeof navigator.hardwareConcurrency === 'number' && navigator.hardwareConcurrency <= 4)
+    // Idle animation is decorative, so keep it inexpensive. Reduced-motion
+    // users receive an almost-static trace while active playback stays fluid.
+    const frameMs = reducedMotion ? 1000 : playing ? (lowEnd ? 1000 / 30 : 1000 / 60) : 1000 / 15
     let lastTs = 0
 
     const draw = (t = 0) => {

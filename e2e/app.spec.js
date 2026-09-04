@@ -16,7 +16,7 @@ test.beforeEach(async ({ page }) => {
     window.AudioContext = WrappedAudioContext
     if (window.webkitAudioContext) window.webkitAudioContext = WrappedAudioContext
   })
-  await page.goto('/')
+  await page.goto('./')
 })
 
 test('load tune and play creates active audio state', async ({ page, browserName }) => {
@@ -90,4 +90,27 @@ test('theme toggle persists across reload', async ({ page }) => {
     }
   })
   expect(storedTheme).toBe(changedTheme)
+})
+
+test('PWA resources stay inside the deployed app base', async ({ page }) => {
+  const appBase = new URL('./', page.url()).href
+  const manifestUrl = await page.locator('link[rel="manifest"]').evaluate((link) => link.href)
+  expect(manifestUrl).toBe(new URL('manifest.webmanifest', appBase).href)
+
+  const manifest = await page.evaluate(async (url) => {
+    const response = await fetch(url)
+    return response.json()
+  }, manifestUrl)
+  expect(new URL(manifest.start_url, manifestUrl).href).toBe(appBase)
+
+  await expect
+    .poll(
+      () =>
+        page.evaluate(async (scope) => {
+          const registration = await navigator.serviceWorker.getRegistration(scope)
+          return registration?.scope ?? null
+        }, appBase),
+      { timeout: 15_000 },
+    )
+    .toBe(appBase)
 })

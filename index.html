@@ -20,7 +20,7 @@
     <!-- Disable SharedWorker before Strudel loads to avoid known clockworker failures.
          Ref: https://github.com/tidalcycles/strudel/pull/1129 -->
     <script>window.SharedWorker = undefined;</script>
-    <script src="https://unpkg.com/@strudel/web@1.3.0"></script>
+    <script defer src="https://unpkg.com/@strudel/web@1.3.0"></script>
   </head>
   <body>
     <div id="root"></div>

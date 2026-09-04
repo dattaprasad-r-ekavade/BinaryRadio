@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { resolvePublicUrl } from './utils/publicUrl';
 
 const rootEl = document.getElementById('root')
 if (!rootEl) throw new Error('Root element #root not found')
@@ -16,7 +17,9 @@ ReactDOM.createRoot(rootEl).render(
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker
-      .register(`/sw.js?cache=${encodeURIComponent(__SW_CACHE_VERSION__)}`)
+      .register(
+        `${resolvePublicUrl('/sw.js')}?cache=${encodeURIComponent(__SW_CACHE_VERSION__)}`,
+      )
       .catch(() => {});
   });
 }

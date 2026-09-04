@@ -7,7 +7,7 @@ const firstTape = '.rack .cas[role="button"]'
 
 test.describe('WAV export (GitHub Pages base)', () => {
   test('records and downloads a WAV after play', async ({ page }) => {
-    await page.goto('/')
+    await page.goto('./')
     await expect(page.locator('.eng')).toContainText('ENGINE READY', { timeout: 60_000 })
 
     await page.locator(firstTape).first().click()
@@ -39,7 +39,7 @@ test.describe('WAV export (GitHub Pages base)', () => {
   })
 
   test('shows guidance when export starts without play', async ({ page }) => {
-    await page.goto('/')
+    await page.goto('./')
     await expect(page.locator('.eng')).toContainText('ENGINE READY', { timeout: 60_000 })
     await page.locator(firstTape).first().click()
     await expect(page.getByRole('button', { name: 'START REC', exact: true })).toBeEnabled({ timeout: 60_000 })
