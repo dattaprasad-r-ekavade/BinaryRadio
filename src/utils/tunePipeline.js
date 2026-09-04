@@ -3,6 +3,12 @@ import { resolvePublicUrl } from './publicUrl'
 const SAMPLE_CALL_RE = /\bs\((['"])([\s\S]*?)\1\)/g
 const SAMPLE_TOKEN_RE = /\b([a-zA-Z][a-zA-Z0-9_-]*)(?::(\d+))?\b/g
 
+export function bpmToCps(bpm, fallbackCps = 0.25) {
+  const numericBpm = Number(bpm)
+  const cps = Number.isFinite(numericBpm) && numericBpm > 0 ? numericBpm / 240 : fallbackCps
+  return Math.max(0.05, Math.min(1, cps))
+}
+
 export function normalizeTrack(track, index = 0) {
   const file =
     track.file && !/^https?:\/\//i.test(track.file) ? resolvePublicUrl(track.file) : track.file

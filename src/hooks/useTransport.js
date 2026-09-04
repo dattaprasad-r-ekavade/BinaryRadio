@@ -5,7 +5,7 @@ import { useKeyboardShortcuts } from './useKeyboardShortcuts'
 import { useDraftTune } from './useDraftTune'
 import { useWavExport } from './useWavExport'
 import { usePwaInstall } from './usePwaInstall'
-import { preparePlaybackCode } from '../utils/tunePipeline'
+import { bpmToCps, preparePlaybackCode } from '../utils/tunePipeline'
 
 function clamp(v, lo, hi) {
   return Math.max(lo, Math.min(hi, v))
@@ -161,12 +161,14 @@ export function useTransport({
 
   const handleLoadAndPlay = useCallback(
     async (track) => {
+      const trackCps = bpmToCps(track.bpm)
       handleStop()
       patch({
         loadedTrack: track,
         loadedCode: null,
         loadedSamples: [],
         loading: true,
+        cps: trackCps,
         msg: { type: 'wait', text: `Loading ${track.title}…` },
       })
       try {
@@ -174,6 +176,7 @@ export function useTransport({
         const { code, selectors } = preparePlaybackCode(rawCode)
         patch({ loadedCode: code, loadedSamples: selectors, msg: null })
         await warmup(selectors)
+        setCps(trackCps)
         await play(code)
         patch({ deckState: 'playing' })
       } catch (e) {
@@ -182,22 +185,25 @@ export function useTransport({
         patch({ loading: false })
       }
     },
-    [handleStop, loadTrackCode, patch, play, setMsg, warmup],
+    [handleStop, loadTrackCode, patch, play, setCps, setMsg, warmup],
   )
 
   const handleLoad = useCallback(
     async (track) => {
+      const trackCps = bpmToCps(track.bpm)
       handleStop()
       patch({
         loadedTrack: track,
         loadedCode: null,
         loadedSamples: [],
         loading: true,
+        cps: trackCps,
         msg: { type: 'wait', text: `Loading ${track.title}…` },
       })
       try {
         const rawCode = await loadTrackCode(track)
         const { code, selectors } = preparePlaybackCode(rawCode)
+        setCps(trackCps)
         patch({ loadedCode: code, loadedSamples: selectors, msg: null })
       } catch (e) {
         setMsg({ type: 'err', text: e instanceof Error ? e.message : String(e) })
@@ -205,7 +211,7 @@ export function useTransport({
         patch({ loading: false })
       }
     },
-    [handleStop, loadTrackCode, patch, setMsg],
+    [handleStop, loadTrackCode, patch, setCps, setMsg],
   )
 
   const drafts = useDraftTune({ handleLoadAndPlay, setCustomTunes, setMsg })

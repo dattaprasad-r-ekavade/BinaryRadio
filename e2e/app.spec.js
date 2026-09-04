@@ -22,6 +22,10 @@ test.beforeEach(async ({ page }) => {
 test('load tune and play creates active audio state', async ({ page, browserName }) => {
   await expect(page.locator('.eng')).toContainText('ENGINE READY', { timeout: 60_000 })
   await page.locator(firstTape).first().click()
+  await expect(page.getByRole('slider', { name: 'Tempo' })).toHaveAttribute(
+    'aria-valuetext',
+    /84 bpm/,
+  )
   const playBtn = page.getByRole('button', { name: 'PLAY', exact: true })
   await expect(playBtn).toBeEnabled({ timeout: 60_000 })
   await playBtn.click()

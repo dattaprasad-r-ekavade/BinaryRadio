@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  bpmToCps,
   extractSampleSelectors,
   isValidManifestTrack,
   normalizeTrack,
@@ -7,6 +8,13 @@ import {
 } from '../utils/tunePipeline'
 
 describe('tune pipeline integration', () => {
+  it('converts cassette BPM metadata to the engine clock', () => {
+    expect(bpmToCps(102)).toBeCloseTo(0.425)
+    expect(bpmToCps('84')).toBeCloseTo(0.35)
+    expect(bpmToCps('unknown')).toBe(0.25)
+    expect(bpmToCps(999)).toBe(1)
+  })
+
   it('normalizes manifest track and prepares playback code/selectors', () => {
     const manifestTrack = {
       id: 'gentle-focus',
