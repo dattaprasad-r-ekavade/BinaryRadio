@@ -55,21 +55,19 @@ describe('CassetteCard', () => {
     expect(screen.getByRole('button', { name: /add test tape to queue/i })).toBeInTheDocument()
   })
 
-  it('triggers load with keyboard enter', () => {
-    const onClick = vi.fn()
+  it('uses a native button for keyboard-accessible tape loading', () => {
     render(
       <CassetteCard
         track={track}
         loaded={false}
         playing={false}
         favorite={false}
-        onClick={onClick}
+        onClick={vi.fn()}
         onFavorite={vi.fn()}
         onQueue={vi.fn()}
       />,
     )
     const card = screen.getByLabelText('Test Tape. Tape description')
-    fireEvent.keyDown(card, { key: 'Enter' })
-    expect(onClick).toHaveBeenCalledTimes(1)
+    expect(card.tagName).toBe('BUTTON')
   })
 })

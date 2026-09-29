@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { expect, test } from '@playwright/test'
 
-const firstTape = '.rack .cas[role="button"]'
+const firstTape = '.rack .cas-select'
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {

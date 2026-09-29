@@ -36,64 +36,61 @@ export default function CassetteCard({
   onFavorite,
   onQueue,
 }) {
-  const onCardKeyDown = (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault()
-      onClick()
-    }
-  }
-
   const status = loaded ? (playing ? 'Playing' : 'Loaded') : null
 
   return (
-    <div
+    <article
       className={loaded ? 'cas cas--loaded' : 'cas'}
       style={{ '--cc': track.color, '--ca': track.accent }}
-      onClick={onClick}
-      onKeyDown={onCardKeyDown}
-      role="button"
-      tabIndex={0}
-      aria-label={`${track.title}${status ? `, ${status}` : ''}. ${track.description}`}
     >
-      <div className="cas-label">
-        <div className="cas-label-head">
-          <span className="cas-emoji" aria-hidden="true">
-            {track.emoji}
-          </span>
-          <span className="cas-name">{track.title}</span>
-          {loaded && (
-            <span className={playing ? 'cas-badge cas-badge--playing' : 'cas-badge'}>
-              {playing ? 'PLAYING' : 'LOADED'}
+      <button
+        type="button"
+        className="cas-select"
+        onClick={onClick}
+        aria-label={`${track.title}${status ? `, ${status}` : ''}. ${track.description}`}
+      >
+        <span className="cas-label">
+          <span className="cas-label-head">
+            <span className="cas-emoji" aria-hidden="true">
+              {track.emoji}
             </span>
-          )}
-        </div>
-        <p className="cas-desc">{track.description}</p>
-        <div className="cas-meta">
-          <span>{track.bpm} BPM</span>
-          <span className="cas-meta-sep" aria-hidden="true">
-            ·
+            <span className="cas-name">{track.title}</span>
+            {loaded && (
+              <span className={playing ? 'cas-badge cas-badge--playing' : 'cas-badge'}>
+                {playing ? 'PLAYING' : 'LOADED'}
+              </span>
+            )}
           </span>
-          <span>{track.key}</span>
-        </div>
-      </div>
-
-      <div className="cas-mech" aria-hidden="true">
-        <span className="cas-screw" />
-        <span className="cas-win">
-          <Reel spin={loaded && playing} size={20} />
-          <span className="cas-bridge" />
-          <Reel spin={loaded && playing} size={20} />
+          <span className="cas-desc">{track.description}</span>
+          <span className="cas-meta">
+            <span>{track.bpm} BPM</span>
+            <span className="cas-meta-sep" aria-hidden="true">
+              ·
+            </span>
+            <span>{track.key}</span>
+          </span>
         </span>
-        <span className="cas-screw" />
-      </div>
+
+        <span className="cas-mech" aria-hidden="true">
+          <span className="cas-screw" />
+          <span className="cas-win">
+            <Reel spin={loaded && playing} size={20} />
+            <span className="cas-bridge" />
+            <Reel spin={loaded && playing} size={20} />
+          </span>
+          <span className="cas-screw" />
+        </span>
+      </button>
 
       {/* Rendered last so it paints above the label without a z-index war. */}
-      <div className="cas-actions" onClick={(e) => e.stopPropagation()}>
+      <div className="cas-actions">
         <button
           type="button"
           className={favorite ? 'cas-act cas-act--fav' : 'cas-act'}
           title={favorite ? 'Remove from favorites' : 'Add to favorites'}
-          aria-label={favorite ? `Remove ${track.title} from favorites` : `Add ${track.title} to favorites`}
+          aria-label={
+            favorite ? `Remove ${track.title} from favorites` : `Add ${track.title} to favorites`
+          }
           aria-pressed={favorite}
           onClick={onFavorite}
         >
@@ -109,7 +106,7 @@ export default function CassetteCard({
           <QueueIcon />
         </button>
       </div>
-    </div>
+    </article>
   )
 }
 

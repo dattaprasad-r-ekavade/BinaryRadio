@@ -214,6 +214,12 @@
   border: 0;
 }
 
+/* A compact transport follows the listener while they browse tapes on a
+   phone. It stays out of the desktop layout, where the full deck is nearby. */
+.mobile-player {
+  display: none;
+}
+
 /* ------------------------------------------------------------- responsive */
 
 @media (max-width: 720px) {
@@ -235,5 +241,89 @@
   .hd-tools {
     width: 100%;
     justify-content: flex-start;
+  }
+
+  .app--has-mobile-player {
+    padding-bottom: calc(6.75rem + env(safe-area-inset-bottom));
+  }
+
+  .mobile-player {
+    position: fixed;
+    z-index: 20;
+    left: var(--sp-3);
+    right: var(--sp-3);
+    bottom: calc(var(--sp-3) + env(safe-area-inset-bottom));
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    max-width: 680px;
+    min-height: 68px;
+    margin: 0 auto;
+    padding: var(--sp-2) var(--sp-2) var(--sp-2) var(--sp-3);
+    border: 1px solid var(--accent-green-border);
+    border-radius: var(--r-lg);
+    background: color-mix(in srgb, var(--panel) 90%, transparent);
+    box-shadow:
+      var(--shadow-elevated),
+      0 0 24px var(--accent-green-glow);
+    backdrop-filter: blur(14px);
+  }
+
+  .mobile-player-info {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .mobile-player-kicker {
+    color: var(--green);
+    font-size: var(--fs-2xs);
+    letter-spacing: var(--ls-wider);
+  }
+
+  .mobile-player-title {
+    overflow: hidden;
+    color: var(--text);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mobile-player-actions {
+    display: flex;
+    flex-shrink: 0;
+    gap: var(--sp-2);
+  }
+
+  .mobile-player-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--tap);
+    height: var(--tap);
+    border: 1px solid var(--border-strong);
+    border-radius: 50%;
+    background: var(--bg3);
+    color: var(--text);
+    box-shadow: var(--btn-top-highlight);
+  }
+
+  .mobile-player-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .mobile-player-btn:disabled {
+    color: var(--dimmer);
+    opacity: 0.65;
+  }
+
+  .mobile-player-btn--primary {
+    border-color: var(--green);
+    background: var(--accent-green-bg-strong);
+    color: var(--green);
   }
 }

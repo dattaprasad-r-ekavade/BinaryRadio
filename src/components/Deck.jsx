@@ -279,7 +279,11 @@ export default function Deck({
                 {Icon.eject}
               </span>
               <p className="deck-idle">NO TAPE</p>
-              <p className="deck-idle-sub">Pick a cassette from the rack below</p>
+              <p className="deck-idle-sub">Choose a cassette to start listening</p>
+              <a className="deck-browse" href="#tape-rack">
+                Browse tapes
+                <span aria-hidden="true">↓</span>
+              </a>
             </>
           )}
         </div>

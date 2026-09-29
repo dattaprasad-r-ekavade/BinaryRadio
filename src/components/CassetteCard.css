@@ -23,11 +23,8 @@
 
 .cas {
   position: relative;
-  display: flex;
-  flex-direction: column;
   border-radius: var(--r-sm);
   overflow: hidden;
-  cursor: pointer;
   text-align: left;
   background: var(--cas-shell);
   border: 1px solid var(--cas-shell-border);
@@ -44,9 +41,21 @@
     0 0 0 1px var(--ca, var(--border-strong));
 }
 
-.cas:focus-visible {
+.cas-select {
+  display: flex;
+  width: 100%;
+  min-height: 100%;
+  flex-direction: column;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.cas-select:focus-visible {
   outline: 2px solid var(--green);
-  outline-offset: 2px;
+  outline-offset: -3px;
 }
 
 .cas--loaded {

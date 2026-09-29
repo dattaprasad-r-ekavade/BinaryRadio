@@ -164,6 +164,31 @@
   color: var(--dim);
 }
 
+.deck-browse {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: 34px;
+  margin-top: var(--sp-2);
+  padding: 0 var(--sp-3);
+  border: 1px solid var(--accent-green-border);
+  border-radius: var(--r-pill);
+  background: var(--accent-green-bg);
+  color: var(--green);
+  font-size: var(--fs-xs);
+  letter-spacing: var(--ls-wide);
+  text-decoration: none;
+  transition:
+    background var(--dur-fast) var(--ease),
+    transform var(--dur-fast) var(--ease);
+}
+
+.deck-browse:hover {
+  background: var(--accent-green-bg-strong);
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+
 .meta-pills {
   margin-top: var(--sp-1);
   display: flex;

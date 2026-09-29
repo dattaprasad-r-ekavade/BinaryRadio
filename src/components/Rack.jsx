@@ -17,9 +17,9 @@ export default function Rack({
   const filtered = onlyFavorites ? tracks.filter((t) => favorites.includes(t.id)) : tracks
 
   return (
-    <section className={radioEnabled ? 'rack rack--radio' : 'rack'}>
+    <section id="tape-rack" className={radioEnabled ? 'rack rack--radio' : 'rack'}>
       <header className="rack-hd">
-        <span className="rack-title">TAPE RACK</span>
+        <h2 className="rack-title">TAPE RACK</h2>
         <div className="rack-tools">
           <button
             type="button"

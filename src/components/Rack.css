@@ -4,6 +4,7 @@
   border-radius: var(--r);
   padding: var(--sp-4);
   box-shadow: var(--shadow-panel);
+  scroll-margin-top: var(--sp-4);
 }
 
 /* Radio mode drives the rack itself, so picking a tape is disabled. The old

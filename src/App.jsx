@@ -40,7 +40,7 @@ export default function App() {
 
   return (
     <div
-      className="app"
+      className={transport.loadedTrack ? 'app app--has-mobile-player' : 'app'}
       data-audio-ready={transport.audioReady ? 'true' : 'false'}
       data-deck-state={transport.deckState}
     >
@@ -88,6 +88,56 @@ export default function App() {
       </header>
 
       <HelpModal open={ui.showShortcuts} onClose={() => ui.actions.setShowShortcuts(false)} />
+
+      {transport.loadedTrack && (
+        <aside className="mobile-player" aria-label="Mobile playback controls">
+          <div className="mobile-player-info">
+            <span className="mobile-player-kicker">
+              {transport.deckState === 'playing'
+                ? 'NOW PLAYING'
+                : transport.deckState === 'paused'
+                  ? 'PAUSED'
+                  : 'TAPE LOADED'}
+            </span>
+            <span className="mobile-player-title">
+              <span aria-hidden="true">{transport.loadedTrack.emoji}</span>{' '}
+              {transport.loadedTrack.title}
+            </span>
+          </div>
+          <div className="mobile-player-actions">
+            <button
+              type="button"
+              className="mobile-player-btn"
+              onClick={transport.actions.stop}
+              disabled={transport.deckState === 'stopped'}
+              aria-label="Stop playback"
+            >
+              <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+                <rect x="5" y="5" width="10" height="10" rx="1" fill="currentColor" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              className="mobile-player-btn mobile-player-btn--primary"
+              onClick={
+                transport.deckState === 'playing' ? transport.actions.pause : transport.actions.play
+              }
+              disabled={!transport.ready}
+              aria-label={transport.deckState === 'playing' ? 'Pause playback' : 'Play tape'}
+            >
+              {transport.deckState === 'playing' ? (
+                <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+                  <path d="M5.5 4h3v12h-3zM11.5 4h3v12h-3z" fill="currentColor" />
+                </svg>
+              ) : (
+                <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+                  <path d="M6 4l10 6-10 6z" fill="currentColor" />
+                </svg>
+              )}
+            </button>
+          </div>
+        </aside>
+      )}
 
       <Suspense fallback={null}>
         <TuneEditor
