@@ -26,6 +26,19 @@
     "durationSec": 300
   },
   {
+    "id": "midnight-drive-v2",
+    "title": "Midnight Drive v2",
+    "file": "/tunes/midnight-drive-v2.md",
+    "color": "#2a1440",
+    "accent": "#bb66ff",
+    "emoji": "🌃",
+    "description": "Synthwave cruise through the city (v2 rework)",
+    "bpm": 108,
+    "key": "Cm",
+    "moodTags": ["synthwave", "night", "v2"],
+    "durationSec": 300
+  },
+  {
     "id": "rain-on-glass",
     "title": "Rain on Glass",
     "file": "/tunes/rain-on-glass.md",
@@ -36,6 +49,19 @@
     "bpm": 76,
     "key": "Dm",
     "moodTags": ["rain", "meditative"],
+    "durationSec": 340
+  },
+  {
+    "id": "rain-on-glass-v2",
+    "title": "Rain on Glass v2",
+    "file": "/tunes/rain-on-glass-v2.md",
+    "color": "#143030",
+    "accent": "#44bbbb",
+    "emoji": "🌧️",
+    "description": "Ambient meditation with rain textures (v2 rework)",
+    "bpm": 76,
+    "key": "Dm",
+    "moodTags": ["rain", "meditative", "v2"],
     "durationSec": 340
   },
   {
@@ -52,6 +78,19 @@
     "durationSec": 280
   },
   {
+    "id": "neon-dreams-v2",
+    "title": "Neon Dreams v2",
+    "file": "/tunes/neon-dreams-v2.md",
+    "color": "#3a1020",
+    "accent": "#ff6688",
+    "emoji": "🕹️",
+    "description": "Chiptune lofi beats (v2 rework)",
+    "bpm": 112,
+    "key": "C",
+    "moodTags": ["chiptune", "lofi", "v2"],
+    "durationSec": 280
+  },
+  {
     "id": "deep-ocean",
     "title": "Deep Ocean",
     "file": "/tunes/deep-ocean.md",
@@ -62,6 +101,19 @@
     "bpm": 72,
     "key": "Fm",
     "moodTags": ["deep", "ambient"],
+    "durationSec": 360
+  },
+  {
+    "id": "deep-ocean-v2",
+    "title": "Deep Ocean v2",
+    "file": "/tunes/deep-ocean-v2.md",
+    "color": "#0a1e2c",
+    "accent": "#3388bb",
+    "emoji": "🐋",
+    "description": "Abyssal ambient depths (v2 rework)",
+    "bpm": 72,
+    "key": "Cm",
+    "moodTags": ["deep", "ambient", "v2"],
     "durationSec": 360
   },
   {
@@ -78,6 +130,19 @@
     "durationSec": 320
   },
   {
+    "id": "solar-wind-v2",
+    "title": "Solar Wind v2",
+    "file": "/tunes/solar-wind-v2.md",
+    "color": "#2a2008",
+    "accent": "#ddaa44",
+    "emoji": "☀️",
+    "description": "Cosmic ambient explorations (v2 rework)",
+    "bpm": 98,
+    "key": "E",
+    "moodTags": ["cosmic", "ambient", "v2"],
+    "durationSec": 320
+  },
+  {
     "id": "campfire-tales",
     "title": "Campfire Tales",
     "file": "/tunes/campfire-tales.md",
@@ -88,6 +153,19 @@
     "bpm": 88,
     "key": "C",
     "moodTags": ["warm", "acoustic"],
+    "durationSec": 300
+  },
+  {
+    "id": "campfire-tales-v2",
+    "title": "Campfire Tales v2",
+    "file": "/tunes/campfire-tales-v2.md",
+    "color": "#3b2317",
+    "accent": "#ff9a3c",
+    "emoji": "🔥",
+    "description": "Warm acoustic-style ambient by the fire (v2 rework)",
+    "bpm": 88,
+    "key": "Am",
+    "moodTags": ["warm", "acoustic", "v2"],
     "durationSec": 300
   },
   {
@@ -104,6 +182,19 @@
     "durationSec": 315
   },
   {
+    "id": "monsoon-v2",
+    "title": "Monsoon v2",
+    "file": "/tunes/monsoon-v2.md",
+    "color": "#1a2f2f",
+    "accent": "#5fcfc6",
+    "emoji": "🌩️",
+    "description": "Raga-inspired ambient with rain-soaked textures (v2 rework)",
+    "bpm": 92,
+    "key": "C Bhairav",
+    "moodTags": ["rain", "raga", "v2"],
+    "durationSec": 315
+  },
+  {
     "id": "rust-belt",
     "title": "Rust Belt",
     "file": "/tunes/rust-belt.md",
@@ -114,6 +205,19 @@
     "bpm": 104,
     "key": "Bm",
     "moodTags": ["industrial", "dub"],
+    "durationSec": 295
+  },
+  {
+    "id": "rust-belt-v2",
+    "title": "Rust Belt v2",
+    "file": "/tunes/rust-belt-v2.md",
+    "color": "#2b1f24",
+    "accent": "#ff6f61",
+    "emoji": "🏭",
+    "description": "Industrial dub groove with heavy low end (v2 rework)",
+    "bpm": 104,
+    "key": "Dm",
+    "moodTags": ["industrial", "dub", "v2"],
     "durationSec": 295
   },
   {
@@ -130,6 +234,19 @@
     "durationSec": 285
   },
   {
+    "id": "tokyo-subway-v2",
+    "title": "Tokyo Subway v2",
+    "file": "/tunes/tokyo-subway-v2.md",
+    "color": "#1a2135",
+    "accent": "#67b0ff",
+    "emoji": "🚇",
+    "description": "Glitchy neon pulse with urban late-night motion (v2 rework)",
+    "bpm": 118,
+    "key": "Em",
+    "moodTags": ["glitch", "urban", "v2"],
+    "durationSec": 285
+  },
+  {
     "id": "goa-sunset",
     "title": "Goa Sunset",
     "file": "/tunes/goa-sunset.md",
@@ -143,6 +260,19 @@
     "durationSec": 310
   },
   {
+    "id": "goa-sunset-v2",
+    "title": "Goa Sunset v2",
+    "file": "/tunes/goa-sunset-v2.md",
+    "color": "#3a2a1a",
+    "accent": "#ffaa55",
+    "emoji": "🌅",
+    "description": "Mira's beachy sunset mixtape vibes — warm pads, sitar echoes & sea spray (v2 rework)",
+    "bpm": 92,
+    "key": "C",
+    "moodTags": ["goa", "sunset", "ambient", "beach", "v2"],
+    "durationSec": 310
+  },
+  {
     "id": "moonlit-local",
     "title": "Moonlit Local",
     "file": "/tunes/moonlit-local.md",
@@ -153,6 +283,19 @@
     "bpm": 102,
     "key": "Dm",
     "moodTags": ["night", "raga", "downtempo", "original"],
+    "durationSec": 324
+  },
+  {
+    "id": "moonlit-local-v2",
+    "title": "Moonlit Local v2",
+    "file": "/tunes/moonlit-local-v2.md",
+    "color": "#171b38",
+    "accent": "#8da2ff",
+    "emoji": "🌙",
+    "description": "A late-night train rhythm dissolving into a warm electronic raga (v2 rework)",
+    "bpm": 102,
+    "key": "Dm",
+    "moodTags": ["night", "raga", "downtempo", "original", "v2"],
     "durationSec": 324
   }
 ]
