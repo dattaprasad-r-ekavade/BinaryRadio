@@ -7,7 +7,7 @@
 
 Retro cassette-deck web app for generative music using [Strudel](https://strudel.cc).
 
-Live demo: https://dattaprasad-r-ekavade.github.io/BinaryRadio/
+Live demo: https://binary-radio.vercel.app/
 
 ## Preview
 
