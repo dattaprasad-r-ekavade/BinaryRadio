@@ -1,17 +1,31 @@
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import PropTypes from 'prop-types'
 import './Knob.css'
 
 /** Sweep of the knob, in degrees, centred on 12 o'clock. */
 const SWEEP = 270
 const START_DEG = -SWEEP / 2
-/** Pixels of vertical drag required to travel the full range. */
-const DRAG_TRAVEL = 260
+/** Pixels of straight drag (up or right) required to travel the full range. */
+const DRAG_TRAVEL = 160
 /** Held Shift divides the drag rate for fine adjustment. */
 const FINE_FACTOR = 5
+/** Closer to the centre than this, the pointer angle jumps too much to follow. */
+const MIN_ROTATE_RADIUS = 12
+/** Pixels of movement before a drag commits to turning or straight dragging. */
+const MODE_PICK_DISTANCE = 4
 
 function clamp(v, lo, hi) {
   return Math.max(lo, Math.min(hi, v))
+}
+
+/** Pointer angle around a centre, in degrees clockwise from 12 o'clock. */
+function angleOf(cx, cy, x, y) {
+  return (Math.atan2(x - cx, cy - y) * 180) / Math.PI
+}
+
+/** Smallest signed difference between two angles, in -180..180. */
+function angleDelta(from, to) {
+  return ((((to - from) % 360) + 540) % 360) - 180
 }
 
 function polar(cx, cy, r, deg) {
@@ -44,8 +58,14 @@ export default function Knob({
   valueText,
   dragDirection = 1,
 }) {
-  const startY = useRef(null)
-  const startVal = useRef(null)
+  const wrapRef = useRef(/** @type {HTMLDivElement | null} */ (null))
+  /* Drag state: last pointer position and angle, plus the unrounded value so
+     small moves accumulate instead of being lost to the 2-decimal rounding. */
+  const drag = useRef(
+    /** @type {{ x: number, y: number, cx: number, cy: number, angle: number, val: number, mode: 'rotary' | 'linear' | null } | null} */ (
+      null
+    ),
+  )
   const range = max - min
   const step = Math.max(0.01, range / 100)
   const pct = clamp((value - min) / range, 0, 1)
@@ -60,17 +80,78 @@ export default function Knob({
 
   const commit = (next) => onChange(parseFloat(clamp(next, min, max).toFixed(2)))
 
-  const startDrag = (clientY) => {
-    startY.current = clientY
-    startVal.current = value
+  const centre = () => {
+    const rect = wrapRef.current?.getBoundingClientRect()
+    return rect ? [rect.left + rect.width / 2, rect.top + rect.height / 2] : [0, 0]
   }
 
-  const moveDrag = (clientY, fine) => {
-    if (startY.current === null || startVal.current === null) return
-    const travel = fine ? DRAG_TRAVEL * FINE_FACTOR : DRAG_TRAVEL
-    const delta = (startY.current - clientY) / travel
-    commit(startVal.current + delta * dragDirection * range)
+  const startDrag = (clientX, clientY) => {
+    const [kx, ky] = centre()
+    drag.current = {
+      x: clientX,
+      y: clientY,
+      cx: kx,
+      cy: ky,
+      angle: angleOf(kx, ky, clientX, clientY),
+      val: value,
+      mode: null,
+    }
   }
+
+  /* Two gestures turn the knob: circling it (clockwise = up) and dragging in a
+     straight line (up or right = up). The first few pixels of movement pick
+     one for the whole drag: moving around the centre from off-centre rotates,
+     anything else is a straight drag. Mixing them per move made the two fight
+     (a rightward drag below the knob is also a counter-clockwise turn). */
+  const moveDrag = (clientX, clientY, fine) => {
+    const d = drag.current
+    if (!d) return
+    if (!d.mode) {
+      const mx = clientX - d.x
+      const my = clientY - d.y
+      if (Math.hypot(mx, my) < MODE_PICK_DISTANCE) return
+      const rx = d.x - d.cx
+      const ry = d.y - d.cy
+      const rLen = Math.hypot(rx, ry)
+      const tangential = rLen ? Math.abs(rx * my - ry * mx) / rLen : 0
+      const radial = rLen ? Math.abs(rx * mx + ry * my) / rLen : Infinity
+      d.mode = rLen > MIN_ROTATE_RADIUS && tangential > radial ? 'rotary' : 'linear'
+    }
+    const rate = fine ? FINE_FACTOR : 1
+    const angle = angleOf(d.cx, d.cy, clientX, clientY)
+    const delta =
+      d.mode === 'rotary'
+        ? angleDelta(d.angle, angle) / (SWEEP * rate)
+        : ((clientX - d.x - (clientY - d.y)) / (DRAG_TRAVEL * rate)) * dragDirection
+    d.val = clamp(d.val + delta * range, min, max)
+    d.x = clientX
+    d.y = clientY
+    d.angle = angle
+    commit(d.val)
+  }
+
+  const endDrag = () => {
+    drag.current = null
+  }
+
+  /* React registers wheel listeners as passive, so the page would scroll
+     while the knob turns. A native listener can cancel that. */
+  const wheelState = useRef({ value, step, commit })
+  useEffect(() => {
+    wheelState.current = { value, step, commit }
+  })
+  useEffect(() => {
+    const el = wrapRef.current
+    if (!el) return undefined
+    const onWheel = (e) => {
+      e.preventDefault()
+      const { value: v, step: s, commit: c } = wheelState.current
+      const direction = e.deltaY > 0 ? -1 : 1
+      c(v + direction * s * (e.shiftKey ? 1 : 3) * dragDirection)
+    }
+    el.addEventListener('wheel', onWheel, { passive: false })
+    return () => el.removeEventListener('wheel', onWheel)
+  }, [dragDirection])
 
   const onKeyDown = (e) => {
     const big = e.shiftKey ? 5 : 1
@@ -88,9 +169,10 @@ export default function Knob({
   }
 
   const onMouseDown = (e) => {
-    startDrag(e.clientY)
-    const onMove = (mv) => moveDrag(mv.clientY, mv.shiftKey)
+    startDrag(e.clientX, e.clientY)
+    const onMove = (mv) => moveDrag(mv.clientX, mv.clientY, mv.shiftKey)
     const onUp = () => {
+      endDrag()
       window.removeEventListener('mousemove', onMove)
       window.removeEventListener('mouseup', onUp)
     }
@@ -100,12 +182,13 @@ export default function Knob({
   }
 
   const onTouchStart = (e) => {
-    startDrag(e.touches[0].clientY)
+    startDrag(e.touches[0].clientX, e.touches[0].clientY)
     const onMove = (mv) => {
       mv.preventDefault()
-      moveDrag(mv.touches[0].clientY, false)
+      moveDrag(mv.touches[0].clientX, mv.touches[0].clientY, false)
     }
     const onEnd = () => {
+      endDrag()
       window.removeEventListener('touchmove', onMove)
       window.removeEventListener('touchend', onEnd)
     }
@@ -114,19 +197,14 @@ export default function Knob({
     e.preventDefault()
   }
 
-  const onWheel = (e) => {
-    const direction = e.deltaY > 0 ? -1 : 1
-    commit(value + direction * step * (e.shiftKey ? 1 : 3) * dragDirection)
-  }
-
   return (
     <div
+      ref={wrapRef}
       className="knob-wrap"
       onMouseDown={onMouseDown}
       onTouchStart={onTouchStart}
       onKeyDown={onKeyDown}
-      onWheel={onWheel}
-      title={`${label} — drag, scroll or use arrow keys (hold Shift for fine control)`}
+      title={`${label} — turn, drag, scroll or use arrow keys (hold Shift for fine control)`}
       role="slider"
       tabIndex={0}
       aria-valuemin={min}

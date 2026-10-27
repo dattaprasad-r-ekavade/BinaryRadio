@@ -3,7 +3,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  cursor: ns-resize;
+  cursor: grab;
   user-select: none;
   -webkit-user-select: none;
   touch-action: none;
