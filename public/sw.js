@@ -29,9 +29,42 @@ self.addEventListener('activate', (event) => {
   self.clients.claim()
 })
 
+const TUNES_PREFIX = appUrl('tunes/')
+
+/* Pages and tunes change without their URL changing, so cache-first served
+   stale copies forever: an old index.html kept registering the old worker, and
+   edited tunes or manifest entries never reached the player. Fetch those from
+   the network first and fall back to the cache only when offline. */
+function isNetworkFirst(request) {
+  return request.mode === 'navigate' || request.url.startsWith(TUNES_PREFIX)
+}
+
+async function networkFirst(request) {
+  try {
+    const res = await fetch(request)
+    if (res.ok) {
+      const copy = res.clone()
+      caches.open(CACHE_NAME).then((cache) => cache.put(request, copy)).catch(() => {})
+    }
+    return res
+  } catch {
+    const cached = await caches.match(request)
+    if (cached) return cached
+    if (request.mode === 'navigate') {
+      return (await caches.match(OFFLINE_URL)) || Response.error()
+    }
+    return Response.error()
+  }
+}
+
 self.addEventListener('fetch', (event) => {
   const { request } = event
   if (request.method !== 'GET') return
+
+  if (isNetworkFirst(request)) {
+    event.respondWith(networkFirst(request))
+    return
+  }
 
   event.respondWith(
     caches.match(request).then(async (cached) => {
