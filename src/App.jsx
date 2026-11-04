@@ -1,12 +1,30 @@
-import { Suspense, lazy } from 'react'
-import Deck from './components/Deck'
-import HelpModal from './components/HelpModal'
-import QueuePanel from './components/QueuePanel'
-import Rack from './components/Rack'
-import { usePlayerState } from './hooks/usePlayerState'
-import './App.css'
+import { Suspense, lazy, useState } from 'react';
+import Deck from './components/Deck';
+import HelpModal from './components/HelpModal';
+import QueuePanel from './components/QueuePanel';
+import Rack from './components/Rack';
+import { usePlayerState } from './hooks/usePlayerState';
+import { useLocalStorage } from './hooks/useLocalStorage';
+import './App.css';
 
-const TuneEditor = lazy(() => import('./components/TuneEditor'))
+const TuneEditor = lazy(() => import('./components/TuneEditor'));
+// three.js is only downloaded when someone opens the shop.
+const ShopView = lazy(() => import('./scene/Shop'));
+
+function hasWebGL() {
+  try {
+    const c = document.createElement('canvas');
+    return !!(window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl')));
+  } catch {
+    return false;
+  }
+}
+
+function initialView() {
+  const q =
+    typeof location !== 'undefined' ? new URLSearchParams(location.search).get('view') : null;
+  return q === 'shop' || q === 'classic' ? q : null;
+}
 
 /** Wordmark glyph. Was a 📼 emoji, which rendered as tofu wherever the
  *  platform emoji font lacked it, and could not be themed. */
@@ -28,15 +46,20 @@ function CassetteMark() {
       <path d="M16 15h16" stroke="currentColor" strokeWidth="2" />
       <path d="M12 26h24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
     </svg>
-  )
+  );
 }
 
 export default function App() {
-  const p = usePlayerState()
-  const { transport, library, queue, ui } = p
+  const p = usePlayerState();
+  const { transport, library, queue, ui } = p;
+  const [savedView, setView] = useLocalStorage('synthreel.view.v1', 'classic');
+  const [webgl] = useState(hasWebGL);
+  const [urlView] = useState(initialView);
+  const view = webgl ? (urlView ?? savedView) : 'classic';
+  const inShop = view === 'shop';
   const srStatus = transport.loadedTrack
     ? `${transport.deckState} ${transport.loadedTrack.title}`
-    : transport.deckState
+    : transport.deckState;
 
   return (
     <div
@@ -50,6 +73,21 @@ export default function App() {
           <span className="logo-name">SYNTHREEL</span>
         </div>
         <div className="hd-tools">
+          {webgl && (
+            <button
+              type="button"
+              className={inShop ? 'mini-btn mini-btn--on' : 'mini-btn'}
+              onClick={() => {
+                if (urlView) window.history.replaceState(null, '', location.pathname);
+                setView(inShop ? 'classic' : 'shop');
+                if (urlView) window.location.reload();
+              }}
+              aria-pressed={inShop}
+              title={inShop ? 'Back to the classic deck' : 'Walk into the 3D cassette shop'}
+            >
+              {inShop ? 'Classic' : 'Shop 3D'}
+            </button>
+          )}
           <button
             type="button"
             className={ui.showEditor ? 'mini-btn mini-btn--on' : 'mini-btn'}
@@ -97,7 +135,7 @@ export default function App() {
 
       <HelpModal open={ui.showShortcuts} onClose={() => ui.actions.setShowShortcuts(false)} />
 
-      {transport.loadedTrack && (
+      {!inShop && transport.loadedTrack && (
         <aside className="mobile-player" aria-label="Mobile playback controls">
           <div className="mobile-player-info">
             <span className="mobile-player-kicker">
@@ -173,64 +211,74 @@ export default function App() {
         </div>
       )}
 
-      <Deck
-        track={transport.loadedTrack}
-        playing={transport.deckState === 'playing'}
-        paused={transport.deckState === 'paused'}
-        looping={transport.looping}
-        cps={transport.cps}
-        ready={transport.ready}
-        onPlay={transport.actions.play}
-        onPause={transport.actions.pause}
-        onStop={transport.actions.stop}
-        onLoop={transport.actions.toggleLooping}
-        onCps={transport.actions.setCps}
-        rjVolume={transport.rjVolume}
-        onRjVolume={transport.actions.setRjVolume}
-        radioEnabled={transport.radio.enabled}
-        radioPhase={transport.radio.phase}
-        radioTimeLeft={transport.radio.timeLeft}
-        onRadioToggle={transport.actions.radioToggle}
-        onRadioSkip={transport.actions.radioSkip}
-        visualMode={transport.visualMode}
-        onVisualMode={transport.actions.setVisualMode}
-        analyser={transport.analyser}
-        channelAnalysers={transport.channelAnalysers}
-        masterVolume={ui.masterVolume}
-        onMasterVolume={transport.actions.setMasterVolume}
-        eq={ui.eq}
-        onEq={ui.actions.setEq}
-        onExport={transport.actions.exportWav}
-        exporting={transport.exporting}
-        exportHint={transport.exportHint}
-        audioReady={transport.audioReady}
-        deckState={transport.deckState}
-      />
+      {inShop && (
+        <Suspense fallback={<div className="app-msg app-msg--wait">Opening the shop…</div>}>
+          <ShopView player={p} />
+        </Suspense>
+      )}
 
-      <p className="sr-only" aria-live="polite">
-        {srStatus}
-      </p>
+      {!inShop && (
+        <>
+          <Deck
+            track={transport.loadedTrack}
+            playing={transport.deckState === 'playing'}
+            paused={transport.deckState === 'paused'}
+            looping={transport.looping}
+            cps={transport.cps}
+            ready={transport.ready}
+            onPlay={transport.actions.play}
+            onPause={transport.actions.pause}
+            onStop={transport.actions.stop}
+            onLoop={transport.actions.toggleLooping}
+            onCps={transport.actions.setCps}
+            rjVolume={transport.rjVolume}
+            onRjVolume={transport.actions.setRjVolume}
+            radioEnabled={transport.radio.enabled}
+            radioPhase={transport.radio.phase}
+            radioTimeLeft={transport.radio.timeLeft}
+            onRadioToggle={transport.actions.radioToggle}
+            onRadioSkip={transport.actions.radioSkip}
+            visualMode={transport.visualMode}
+            onVisualMode={transport.actions.setVisualMode}
+            analyser={transport.analyser}
+            channelAnalysers={transport.channelAnalysers}
+            masterVolume={ui.masterVolume}
+            onMasterVolume={transport.actions.setMasterVolume}
+            eq={ui.eq}
+            onEq={ui.actions.setEq}
+            onExport={transport.actions.exportWav}
+            exporting={transport.exporting}
+            exportHint={transport.exportHint}
+            audioReady={transport.audioReady}
+            deckState={transport.deckState}
+          />
 
-      <QueuePanel
-        queueTracks={queue.tracks}
-        onRemove={queue.actions.remove}
-        onMove={queue.actions.move}
-        onClear={queue.actions.clear}
-        onPlayNow={queue.actions.playNow}
-      />
+          <p className="sr-only" aria-live="polite">
+            {srStatus}
+          </p>
 
-      <Rack
-        tracks={library.tracks}
-        loadedId={transport.loadedTrack?.id}
-        playing={transport.deckState === 'playing'}
-        onLoad={transport.actions.radioLoad}
-        radioEnabled={transport.radio.enabled}
-        favorites={library.favorites}
-        onFavorite={library.actions.toggleFavorite}
-        onQueue={library.actions.queueTrack}
-        onlyFavorites={library.onlyFavorites}
-        onToggleFavorites={library.actions.toggleOnlyFavorites}
-      />
+          <QueuePanel
+            queueTracks={queue.tracks}
+            onRemove={queue.actions.remove}
+            onMove={queue.actions.move}
+            onClear={queue.actions.clear}
+            onPlayNow={queue.actions.playNow}
+          />
+
+          <Rack
+            tracks={library.tracks}
+            loadedId={transport.loadedTrack?.id}
+            playing={transport.deckState === 'playing'}
+            onLoad={transport.actions.radioLoad}
+            radioEnabled={transport.radio.enabled}
+            favorites={library.favorites}
+            onFavorite={library.actions.toggleFavorite}
+            onQueue={library.actions.queueTrack}
+            onlyFavorites={library.onlyFavorites}
+            onToggleFavorites={library.actions.toggleOnlyFavorites}
+          />
+        </>
+      )}
 
       <footer className="app-ft">
         <span>
@@ -251,5 +299,5 @@ export default function App() {
         <span>Favorites, queue, and custom tunes are saved locally</span>
       </footer>
     </div>
-  )
+  );
 }

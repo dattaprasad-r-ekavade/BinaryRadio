@@ -374,6 +374,7 @@ export function useTransport({
       setMasterVolume: handleMasterVolume,
       exportWav: handleExport,
       radioLoad: handleRadioLoad,
+      loadAndPlay: handleLoadAndPlay,
       radioToggle: handleRadioToggle,
       radioSkip: handleRadioSkip,
       setShowEditor: (v) => setField('showEditor', v),

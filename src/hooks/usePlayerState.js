@@ -54,6 +54,7 @@ export function usePlayerState() {
         setMasterVolume: transport.actions.setMasterVolume,
         exportWav: transport.actions.exportWav,
         radioLoad: transport.actions.radioLoad,
+        loadAndPlay: transport.actions.loadAndPlay,
         radioToggle: transport.actions.radioToggle,
         radioSkip: transport.actions.radioSkip,
       },
