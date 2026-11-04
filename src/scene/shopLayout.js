@@ -18,7 +18,7 @@ export const SHELF = {
 }
 
 /** Cassette case shown face-out (stylised, about 2x real size so labels read). */
-export const CASSETTE = { w: 0.22, h: 0.14, d: 0.03, spacing: 0.27, tilt: -0.18 }
+export const CASSETTE = { w: 0.26, h: 0.165, d: 0.034, spacing: 0.31, tilt: -0.18 }
 
 export const SIGN = { x: -1.5, y: 2.82, z: -2.96, w: 3.0, h: 0.6 }
 
@@ -38,8 +38,8 @@ export const WINDOW = { x: -3.98, y: 1.7, z: 0.2, w: 2.2, h: 1.6 }
 
 /** Camera viewpoints: position and look-at target. */
 export const VIEWPOINTS = {
-  overview: { label: 'Overview', position: [2.0, 1.8, 4.3], target: [-1.1, 1.0, -1.4] },
-  shelves: { label: 'Shelves', position: [-1.5, 1.6, 0.6], target: [-1.5, 1.3, -2.8] },
-  counter: { label: 'Counter', position: [0.95, 1.9, 2.75], target: [1.0, 1.15, 0.3] },
-  keyboard: { label: 'Keyboard', position: [-1.75, 1.8, 2.25], target: [-2.55, 0.95, 1.0] },
+  overview: { label: 'Whole shop', position: [2.0, 1.8, 4.3], target: [-1.1, 1.0, -1.4] },
+  shelves: { label: 'Browse tapes', position: [-1.5, 1.5, -0.1], target: [-1.5, 1.25, -2.8] },
+  counter: { label: 'Listening deck', position: [0.95, 1.9, 2.75], target: [1.0, 1.15, 0.3] },
+  keyboard: { label: 'Play keyboard', position: [-1.98, 1.62, 2.0], target: [-2.55, 0.97, 1.0] },
 }

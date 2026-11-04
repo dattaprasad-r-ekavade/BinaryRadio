@@ -221,7 +221,7 @@ function useCaseMaterials(texture, look) {
  * One cassette. `bin` tapes lie flat and lift when hovered. Shelf tapes slide
  * forward and tilt up when hovered or picked. Clicking calls onPick(track).
  */
-function Cassette({ track, look, base, bin = false, pulled = false, loaded = false, favorite = false, starTex, onPick }) {
+function Cassette({ track, look, base, bin = false, pulled = false, loaded = false, favorite = false, starTex, onPick, onHover }) {
   const group = useRef(null)
   const [hovered, setHovered] = useState(false)
   useCursor(hovered)
@@ -267,8 +267,12 @@ function Cassette({ track, look, base, bin = false, pulled = false, loaded = fal
           onPointerOver={(e) => {
             e.stopPropagation()
             setHovered(true)
+            onHover?.(track)
           }}
-          onPointerOut={() => setHovered(false)}
+          onPointerOut={() => {
+            setHovered(false)
+            onHover?.(null)
+          }}
           onClick={(e) => {
             e.stopPropagation()
             onPick?.(track)
@@ -311,7 +315,7 @@ function Cassette({ track, look, base, bin = false, pulled = false, loaded = fal
 }
 
 /** The shelf unit, the mood sections and the bargain bin, with their tapes. */
-export default function Shelves({ look, tracks = NO_TRACKS, favorites = NO_IDS, loadedId, pickedId, onPick }) {
+export default function Shelves({ look, tracks = NO_TRACKS, favorites = NO_IDS, loadedId, pickedId, onPick, onHover }) {
   const sections = useMemo(() => groupTracksByMood(tracks, 3), [tracks])
   const shelfItems = useMemo(() => layoutShelf(sections), [sections])
   const binTracks = useMemo(() => bargainBinTracks(tracks, 8), [tracks])
@@ -374,6 +378,7 @@ export default function Shelves({ look, tracks = NO_TRACKS, favorites = NO_IDS, 
           favorite={favouriteIds.has(track.id)}
           starTex={starTex}
           onPick={onPick}
+          onHover={onHover}
         />
       ))}
 
@@ -388,6 +393,7 @@ export default function Shelves({ look, tracks = NO_TRACKS, favorites = NO_IDS, 
           favorite={favouriteIds.has(track.id)}
           starTex={starTex}
           onPick={onPick}
+          onHover={onHover}
         />
       ))}
     </group>

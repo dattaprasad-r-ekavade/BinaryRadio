@@ -1,5 +1,5 @@
 // @ts-nocheck — react-three-fiber scene component; typed migration tracked with the other audio/visual refs
-import { EffectComposer, Bloom, Noise, Vignette } from '@react-three/postprocessing'
+import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing'
 
 /**
  * Post effects per look. Neon Night gets bloom (only the brightest parts
@@ -10,7 +10,6 @@ export default function Effects({ look }) {
     return (
       <EffectComposer key={look.id} disableNormalPass>
         <Bloom mipmapBlur luminanceThreshold={0.85} intensity={0.9} radius={0.6} />
-        <Noise opacity={0.04} />
         <Vignette offset={0.3} darkness={0.6} />
       </EffectComposer>
     )

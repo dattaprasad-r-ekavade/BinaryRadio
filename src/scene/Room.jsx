@@ -492,7 +492,7 @@ function LightBeam({ x, z, material, seed }) {
           size={0.012}
           color="#ffffff"
           transparent
-          opacity={0.6}
+          opacity={0.35}
           depthWrite={false}
           blending={THREE.AdditiveBlending}
           sizeAttenuation

@@ -149,7 +149,7 @@ function PianoKey({ midi, layout, lit, dim, pal, look, pressedRef, onDown, onUp,
  * The demo booth keyboard. Plays a small Web Audio synth from pointer or
  * computer keys, with an optional scale lock that snaps notes to the tape's key.
  */
-export default function KeyboardStation({ look, trackKey, active, onFocus }) {
+export default function KeyboardStation({ look, trackKey, active, onFocus, scaleLock, onScaleLockChange }) {
   const L = look ?? LOOKS.day
   const night = !!L.night
   const pal = night ? NIGHT_PAL : DAY_PAL
@@ -161,7 +161,9 @@ export default function KeyboardStation({ look, trackKey, active, onFocus }) {
 
   const [octave, setOctave] = useState(BASE_OCTAVE)
   const octaveRef = useRef(BASE_OCTAVE)
-  const [lockOn, setLockOn] = useState(false)
+  const [ownLock, setOwnLock] = useState(false)
+  // Controlled by the shop's Scale lock button when `scaleLock` is passed.
+  const lockOn = scaleLock ?? ownLock
   const lockRef = useRef(false)
   const [hovering, setHovering] = useState(false)
   useCursor(hovering)
@@ -267,10 +269,15 @@ export default function KeyboardStation({ look, trackKey, active, onFocus }) {
   // Free the audio context on unmount. A later noteOn would open a new one.
   useEffect(() => () => synth.dispose(), [synth])
 
+  useEffect(() => {
+    lockRef.current = lockOn
+  }, [lockOn])
+
   const toggleLock = () => {
     const next = !lockRef.current
     lockRef.current = next
-    setLockOn(next)
+    setOwnLock(next)
+    onScaleLockChange?.(next)
   }
 
   const topY = KEYBOARD.topY
