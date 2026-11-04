@@ -72,10 +72,35 @@ function layoutShelf(sections) {
     for (const track of section.tracks) {
       let bay = sectionIndex
       while (bay < lastBay && used[bay] >= capacity(bay)) bay++
-      items.push({ track, base: bayTapePosition(bay, used[bay]) })
+      items.push({ track, bay, base: bayTapePosition(bay, used[bay]) })
       used[bay]++
     }
   })
+
+  // A bay that fits in one layer: spread its tapes over every row and centre
+  // each row, so a small library fills the shelf instead of leaving the top
+  // rows empty.
+  for (let bay = 0; bay < bays; bay++) {
+    const inBay = items.filter((it) => it.bay === bay)
+    const { perLayer } = bayTapePosition(bay, 0)
+    if (!inBay.length || inBay.length > perLayer) continue
+    const rows = SHELF.tapeRows.length
+    const perRow = Math.ceil(inBay.length / rows)
+    const centre = (SHELF.uprightXs[bay] + SHELF.uprightXs[bay + 1]) / 2
+    // Fill eye level first: middle row, then top, then bottom.
+    const rowOrder = rows === 3 ? [1, 2, 0] : [...Array(rows).keys()]
+    inBay.forEach((it, i) => {
+      const r = Math.floor(i / perRow)
+      const inRow = Math.min(perRow, inBay.length - r * perRow)
+      const col = i % perRow
+      it.base = {
+        ...it.base,
+        x: centre + (col - (inRow - 1) / 2) * CASSETTE.spacing,
+        y: SHELF.tapeRows[rowOrder[r]] + CASSETTE.h / 2 + 0.01,
+        z: SHELF_TAPE_Z,
+      }
+    })
+  }
   return items
 }
 

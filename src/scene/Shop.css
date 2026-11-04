@@ -140,6 +140,8 @@
 }
 
 .shop-now-kicker {
+  flex-shrink: 0;
+  white-space: nowrap;
   font-size: 10px;
   letter-spacing: 0.14em;
   color: var(--shop-muted);

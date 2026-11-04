@@ -84,7 +84,7 @@ export default function ShopView({ player }) {
       >
         <color attach="background" args={[look.background]} />
         <Suspense fallback={null}>
-          <Room look={look} />
+          <Room look={look} view={view} />
           <Shelves
             look={look}
             tracks={library.tracks}

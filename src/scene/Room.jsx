@@ -22,7 +22,7 @@ const WINDOW_H = 800
 /** Beams stop just under the sign (its bottom edge is SIGN.y - SIGN.h / 2). */
 const BEAM_TOP = SIGN.y - SIGN.h / 2 - 0.25
 const BEAM_TOP_R = 0.24
-const BEAM_BOTTOM_R = 1.05
+const BEAM_BOTTOM_R = 0.75
 const SPOT_Y = ROOM.height - 0.1
 
 const SHELF_CX = (SHELF.x0 + SHELF.x1) / 2
@@ -458,7 +458,7 @@ function buildNightRig(look) {
   deckTarget.position.set(DECK.x, DECK.y, DECK.z)
   const binTarget = new THREE.Object3D()
   binTarget.position.set(BIN.x, BIN.h / 2, BIN.z)
-  const spotDeck = makeSpot(look.accentB, 5, DECK.x, DECK.z, deckTarget)
+  const spotDeck = makeSpot('#9ff6ff', 4, DECK.x, DECK.z, deckTarget)
   const spotBin = makeSpot(look.violet, 16, BIN.x, BIN.z, binTarget)
   return {
     lights: [ambient, ...points, spotDeck, spotBin],
@@ -489,7 +489,7 @@ function LightBeam({ x, z, material, seed }) {
           <bufferAttribute attach="attributes-position" args={[dust, 3]} />
         </bufferGeometry>
         <pointsMaterial
-          size={0.025}
+          size={0.012}
           color="#ffffff"
           transparent
           opacity={0.6}
@@ -518,7 +518,7 @@ function Poster({ z, texture, frameColor }) {
   )
 }
 
-export default function Room({ look }) {
+export default function Room({ look, view }) {
   const night = look.night
   const res = useMemo(() => buildAssets(look), [look])
   const rig = useMemo(() => (night ? buildNightRig(look) : buildDayRig(look)), [look, night])
@@ -724,7 +724,8 @@ export default function Room({ look }) {
             <cylinderGeometry args={[0.12, 0.12, 0.1, 16]} />
             <meshStandardMaterial color="#14101f" roughness={0.6} />
           </mesh>
-          <LightBeam x={DECK.x} z={DECK.z} material={res.beamCyan} seed={3} />
+          {/* Hidden at the counter: the camera would look straight through it. */}
+          {view !== 'counter' && <LightBeam x={DECK.x} z={DECK.z} material={res.beamCyan} seed={3} />}
           <LightBeam x={BIN.x} z={BIN.z} material={res.beamViolet} seed={9} />
         </>
       )}
