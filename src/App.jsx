@@ -63,7 +63,9 @@ export default function App() {
 
   return (
     <div
-      className={transport.loadedTrack ? 'app app--has-mobile-player' : 'app'}
+      className={
+        inShop ? 'app app--shop' : transport.loadedTrack ? 'app app--has-mobile-player' : 'app'
+      }
       data-audio-ready={transport.audioReady ? 'true' : 'false'}
       data-deck-state={transport.deckState}
     >
@@ -280,24 +282,26 @@ export default function App() {
         </>
       )}
 
-      <footer className="app-ft">
-        <span>
-          Powered by{' '}
-          <a href="https://strudel.cc" target="_blank" rel="noreferrer">
-            Strudel
+      {!inShop && (
+        <footer className="app-ft">
+          <span>
+            Powered by{' '}
+            <a href="https://strudel.cc" target="_blank" rel="noreferrer">
+              Strudel
+            </a>
+          </span>
+          <span className="ft-dot">·</span>
+          <a
+            href="https://github.com/dattaprasad-r-ekavade/BinaryRadio"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Source code
           </a>
-        </span>
-        <span className="ft-dot">·</span>
-        <a
-          href="https://github.com/dattaprasad-r-ekavade/BinaryRadio"
-          target="_blank"
-          rel="noreferrer"
-        >
-          Source code
-        </a>
-        <span className="ft-dot">·</span>
-        <span>Favorites, queue, and custom tunes are saved locally</span>
-      </footer>
+          <span className="ft-dot">·</span>
+          <span>Favorites, queue, and custom tunes are saved locally</span>
+        </footer>
+      )}
     </div>
   );
 }

@@ -4,7 +4,11 @@
  * Every scene component places itself from these constants so parts built
  * separately line up.
  */
-export const ROOM = { minX: -4, maxX: 4, minZ: -3, maxZ: 3, height: 3.4 }
+// The room is closed on all sides: every camera viewpoint sits inside it.
+export const ROOM = { minX: -4, maxX: 4, minZ: -3, maxZ: 5.2, height: 3.4 }
+
+/** Front wall door (behind the overview camera). */
+export const DOOR = { x: 1.6, w: 1.1, h: 2.3 }
 
 export const SHELF = {
   x0: -3.7, // left end of the shelf unit

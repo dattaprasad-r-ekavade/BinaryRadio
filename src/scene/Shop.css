@@ -546,3 +546,12 @@
     font-size: 22px;
   }
 }
+
+/* In the full-window shop the stage takes whatever height is left. */
+@media (max-width: 640px) {
+  .app--shop .shop-stage {
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 240px;
+  }
+}

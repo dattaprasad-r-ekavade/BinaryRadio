@@ -534,6 +534,9 @@ export default function Room({ look, view }) {
   const height = ROOM.height
   const roomW = ROOM.maxX - ROOM.minX
   const roomD = ROOM.maxZ - ROOM.minZ
+  // Centre of the floor plan (the room is deeper towards the camera side).
+  const cx = (ROOM.minX + ROOM.maxX) / 2
+  const cz = (ROOM.minZ + ROOM.maxZ) / 2
 
   useEffect(() => {
     return () => {
@@ -552,7 +555,7 @@ export default function Room({ look, view }) {
       ))}
 
       {/* Floor */}
-      <mesh rotation-x={-Math.PI / 2} position={[0, 0, 0]} receiveShadow>
+      <mesh rotation-x={-Math.PI / 2} position={[cx, 0, cz]} receiveShadow>
         <planeGeometry args={[roomW, roomD]} />
         {night ? (
           <MeshReflectorMaterial
@@ -571,25 +574,31 @@ export default function Room({ look, view }) {
       </mesh>
 
       {/* Back wall */}
-      <mesh position={[0, height / 2, ROOM.minZ]} receiveShadow>
+      <mesh position={[cx, height / 2, ROOM.minZ]} receiveShadow>
         <planeGeometry args={[roomW, height]} />
         <meshStandardMaterial map={res.wall} roughness={night ? 0.5 : 0.9} metalness={0} />
       </mesh>
 
       {/* Left wall */}
-      <mesh position={[ROOM.minX, height / 2, 0]} rotation-y={Math.PI / 2} receiveShadow>
+      <mesh position={[ROOM.minX, height / 2, cz]} rotation-y={Math.PI / 2} receiveShadow>
         <planeGeometry args={[roomD, height]} />
         <meshStandardMaterial map={res.wall} roughness={night ? 0.5 : 0.9} metalness={0} />
       </mesh>
 
       {/* Right wall */}
-      <mesh position={[ROOM.maxX, height / 2, 0]} rotation-y={-Math.PI / 2} receiveShadow>
+      <mesh position={[ROOM.maxX, height / 2, cz]} rotation-y={-Math.PI / 2} receiveShadow>
         <planeGeometry args={[roomD, height]} />
         <meshStandardMaterial map={res.wall} roughness={night ? 0.5 : 0.9} metalness={0} />
       </mesh>
 
-      {/* Ceiling (no front wall: the room is open to the street side) */}
-      <mesh position={[0, height, 0]} rotation-x={Math.PI / 2}>
+      {/* Front wall, behind the overview camera, so the room is closed. */}
+      <mesh position={[cx, height / 2, ROOM.maxZ]} rotation-y={Math.PI} receiveShadow>
+        <planeGeometry args={[roomW, height]} />
+        <meshStandardMaterial map={res.wall} roughness={night ? 0.5 : 0.9} metalness={0} />
+      </mesh>
+
+      {/* Ceiling */}
+      <mesh position={[cx, height, cz]} rotation-x={Math.PI / 2}>
         <planeGeometry args={[roomW, roomD]} />
         <meshStandardMaterial color={night ? look.wallLower : look.wall} roughness={0.95} />
       </mesh>

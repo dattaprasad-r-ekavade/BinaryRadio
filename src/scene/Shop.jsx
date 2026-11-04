@@ -3,6 +3,7 @@ import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'rea
 import { Canvas } from '@react-three/fiber'
 import { CameraControls } from '@react-three/drei'
 import Room from './Room'
+import Decor from './Decor'
 import Effects from './Effects'
 import Shelves from './Shelves'
 import Counter from './Counter'
@@ -29,7 +30,7 @@ function guideFor(view, { loaded, playing, ready }) {
     case 'keyboard':
       return 'Click the keys, or type A S D F G H J K (Z / X change octave). Scale lock keeps every note in the tape’s key.'
     default:
-      return 'Click the shelves, the deck or the keyboard to walk over. Drag to look around.'
+      return 'Click the shelves, the deck or the keyboard to walk over, or use the buttons above.'
   }
 }
 
@@ -194,6 +195,7 @@ export default function ShopView({ player }) {
           <color attach="background" args={[look.background]} />
           <Suspense fallback={null}>
             <Room look={look} view={view} />
+            <Decor look={look} tracks={library.tracks} />
             <Shelves
               look={look}
               tracks={library.tracks}
@@ -221,14 +223,20 @@ export default function ShopView({ player }) {
           <CameraControls
             ref={(c) => {
               controls.current = c
+              if (c) {
+                // Locked camera: it only moves between the fixed viewpoints, so
+                // you can never drag or zoom outside the room. (0 = ACTION.NONE)
+                c.mouseButtons.left = 0
+                c.mouseButtons.middle = 0
+                c.mouseButtons.right = 0
+                c.mouseButtons.wheel = 0
+                c.touches.one = 0
+                c.touches.two = 0
+                c.touches.three = 0
+              }
               if (c && !controlsReady) setControlsReady(true)
             }}
             makeDefault
-            minDistance={0.6}
-            maxDistance={7}
-            maxPolarAngle={Math.PI * 0.52}
-            dollySpeed={0.4}
-            truckSpeed={0}
             smoothTime={0.6}
           />
         </Canvas>
