@@ -117,6 +117,19 @@ can't keep 30 fps even on Neon Night Low, suggest Cosy Day or Classic view.
 - **Cassettes:** labels stay readable in both looks. Insert and spine
   textures are generated at runtime from track data, with a separate
   emissive mask for Neon Night (title and accent stripe glow faintly).
+- **The shop name must always be readable** from the overview viewpoint,
+  in both looks and at every quality tier. Rules for the sign:
+  - Letters are a solid light core on a dark backing board (Neon Night) or
+    dark-outlined light letters on a painted board (Cosy Day).
+  - In Neon Night, the colour lives in a narrow halo around each letter.
+    Glow comes from the bloom effect, which is tuned so only the brightest
+    parts glow (threshold about 0.85); the letters themselves are never
+    blurred or over-brightened.
+  - Light beams and haze start below the sign, never across it.
+  - Texture filters (painted strokes, pixelation) are never applied to the
+    sign's lettering.
+  - Add a screenshot check per look and tier in the e2e smoke test so a
+    later effect change can't wash it out again.
 - **Fonts:** Space Mono for labels and the 2D overlay (already in the app);
   one original display font for signs (a script for neon, a brush serif for
   painted signs).
