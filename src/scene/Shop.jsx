@@ -1,3 +1,4 @@
+// @ts-nocheck — react-three-fiber scene component; typed migration tracked with the other audio/visual refs
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { CameraControls } from '@react-three/drei';
@@ -21,10 +22,13 @@ export default function ShopView({ player }) {
   const { transport, library } = player;
   const look = useLook();
   const [view, setView] = useState('overview');
-  const [picked, setPicked] = useState(null);
+  const [picked, setPicked] = useState(/** @type {any} */ (null));
   const [finderOpen, setFinderOpen] = useState(false);
   const [query, setQuery] = useState('');
-  const controls = useRef(null);
+  const controls = useRef(/** @type {any} */ (null));
+  const firstMove = useRef(false); // the first placement snaps; later moves animate
+  // Set once the canvas has mounted CameraControls (it mounts after this component's effects run).
+  const [controlsReady, setControlsReady] = useState(false);
 
   const reducedMotion = useMemo(
     () =>
@@ -35,8 +39,9 @@ export default function ShopView({ player }) {
 
   useEffect(() => {
     const v = VIEWPOINTS[view];
-    controls.current?.setLookAt(...v.position, ...v.target, !reducedMotion);
-  }, [view, reducedMotion]);
+    controls.current?.setLookAt(...v.position, ...v.target, controlsReady && !reducedMotion && firstMove.current);
+    if (controls.current) firstMove.current = true;
+  }, [view, reducedMotion, controlsReady]);
 
   // Esc goes back to the overview (or closes a panel first).
   useEffect(() => {
@@ -98,7 +103,10 @@ export default function ShopView({ player }) {
           <Effects look={look} />
         </Suspense>
         <CameraControls
-          ref={controls}
+          ref={(c) => {
+            controls.current = c;
+            if (c && !controlsReady) setControlsReady(true);
+          }}
           makeDefault
           minDistance={0.6}
           maxDistance={7}

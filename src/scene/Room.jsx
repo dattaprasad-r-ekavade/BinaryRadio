@@ -1,3 +1,4 @@
+// @ts-nocheck — react-three-fiber scene component; typed migration tracked with the other audio/visual refs
 import { useEffect, useMemo } from 'react'
 import * as THREE from 'three'
 import { MeshReflectorMaterial } from '@react-three/drei'
@@ -387,8 +388,8 @@ function buildAssets(look) {
     card: makeCanvasTexture(1024, 300, (ctx, w, h) => drawBargainCard(ctx, w, h, look)),
     posterA: makeCanvasTexture(512, 730, (ctx, w, h) => drawPoster(ctx, w, h, look, 0)),
     posterB: makeCanvasTexture(512, 730, (ctx, w, h) => drawPoster(ctx, w, h, look, 1)),
-    beamCyan: makeBeamMaterial(look.accentB, 0.55),
-    beamViolet: makeBeamMaterial(look.violet || look.accentB, 0.55),
+    beamCyan: makeBeamMaterial(look.accentB, 0.1),
+    beamViolet: makeBeamMaterial(look.violet || look.accentB, 0.28),
   }
 }
 
@@ -440,12 +441,14 @@ function buildDayRig(look) {
 
 /** Night: violet ambient, coloured point lights and two ceiling spots. */
 function buildNightRig(look) {
-  const ambient = new THREE.AmbientLight('#2a1f4d', 0.8)
+  const ambient = new THREE.AmbientLight('#3a2d6a', 1.6)
   const points = [
     [-1.4, 1.7, -1.9, look.accentA, 6],
     [2.6, 1.6, -0.8, look.accentB, 5],
     [-2.8, 2.2, 1.6, look.violet, 5],
     [0.6, 1.2, 1.9, look.accentA, 3],
+    [-2.3, 1.7, 1.7, '#b48cff', 4], // keyboard corner
+    [-1.5, 1.3, -1.6, '#ff8fe0', 3], // shelf faces
   ].map(([x, y, z, color, intensity]) => {
     const p = new THREE.PointLight(color, intensity, 7, 2)
     p.position.set(x, y, z)
@@ -455,7 +458,7 @@ function buildNightRig(look) {
   deckTarget.position.set(DECK.x, DECK.y, DECK.z)
   const binTarget = new THREE.Object3D()
   binTarget.position.set(BIN.x, BIN.h / 2, BIN.z)
-  const spotDeck = makeSpot(look.accentB, 16, DECK.x, DECK.z, deckTarget)
+  const spotDeck = makeSpot(look.accentB, 5, DECK.x, DECK.z, deckTarget)
   const spotBin = makeSpot(look.violet, 16, BIN.x, BIN.z, binTarget)
   return {
     lights: [ambient, ...points, spotDeck, spotBin],

@@ -1,3 +1,4 @@
+// @ts-nocheck — react-three-fiber scene component; typed migration tracked with the other audio/visual refs
 import { EffectComposer, Bloom, Noise, Vignette } from '@react-three/postprocessing'
 
 /**

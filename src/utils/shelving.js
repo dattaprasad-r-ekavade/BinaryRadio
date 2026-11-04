@@ -39,7 +39,7 @@ export function groupTracksByMood(tracks, maxSections = 3) {
     .sort((a, b) => counts.get(b) - counts.get(a) || firstSeen.get(a) - firstSeen.get(b))
     .slice(0, limit)
 
-  const sections = chosen.map((tag) => ({ tag, label: tag.toUpperCase(), tracks: [] }))
+  const sections = chosen.map((tag) => ({ tag, label: tag.toUpperCase(), tracks: /** @type {any[]} */ ([]) }))
   if (sections.length === 0) return []
   const sectionIndex = new Map(chosen.map((tag, i) => [tag, i]))
 

@@ -39,7 +39,7 @@ export const WINDOW = { x: -3.98, y: 1.7, z: 0.2, w: 2.2, h: 1.6 }
 /** Camera viewpoints: position and look-at target. */
 export const VIEWPOINTS = {
   overview: { label: 'Overview', position: [2.0, 1.8, 4.3], target: [-1.1, 1.0, -1.4] },
-  shelves: { label: 'Shelves', position: [-1.5, 1.45, -0.4], target: [-1.5, 1.2, -2.8] },
+  shelves: { label: 'Shelves', position: [-1.5, 1.6, 0.6], target: [-1.5, 1.3, -2.8] },
   counter: { label: 'Counter', position: [1.3, 1.75, 1.95], target: [1.2, 1.15, 0.3] },
   keyboard: { label: 'Keyboard', position: [-1.75, 1.8, 2.25], target: [-2.55, 0.95, 1.0] },
 }
