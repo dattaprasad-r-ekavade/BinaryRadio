@@ -327,3 +327,32 @@
     color: var(--green);
   }
 }
+
+/* 3D shop mode: the shop fills the whole window under a slim header,
+   with no page margins, footer or empty space around it. */
+.app--shop {
+  max-width: none;
+  height: 100vh;
+  height: 100dvh;
+  padding: 0;
+  gap: 0;
+  overflow: hidden;
+}
+
+.app--shop .app-hd {
+  flex: 0 0 auto;
+  padding: var(--sp-2) var(--sp-4);
+}
+
+.app--shop .app-msg {
+  flex: 0 0 auto;
+  margin: var(--sp-2) var(--sp-4) 0;
+}
+
+.app--shop .shop {
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+}

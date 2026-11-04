@@ -36,4 +36,9 @@ export default [
       },
     },
   },
+  {
+    // react-three-fiber elements use three.js props (args, position, rotation-x…)
+    files: ['src/scene/**/*.{js,jsx}'],
+    rules: { 'react/no-unknown-property': 'off' },
+  },
 ]

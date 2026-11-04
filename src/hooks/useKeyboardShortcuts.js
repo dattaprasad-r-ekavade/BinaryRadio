@@ -9,7 +9,7 @@ function shouldIgnore(target) {
 export function useKeyboardShortcuts(map) {
   useEffect(() => {
     const onKeyDown = (e) => {
-      if (shouldIgnore(e.target)) return;
+      if (e.defaultPrevented || shouldIgnore(e.target)) return;
       const key = e.key.toLowerCase();
       const fn = map[key];
       if (!fn) return;

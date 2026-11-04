@@ -25,6 +25,18 @@ function waitForGlobal(name, ms = 15000) {
   });
 }
 
+/** Re-inject the Strudel <script> so a failed CDN load gets another chance. */
+function reloadStrudelScript() {
+  if (typeof window.initStrudel === 'function') return;
+  const old = document.querySelector('script[src*="@strudel/web@"]');
+  const src = old?.getAttribute('src') || `https://unpkg.com/@strudel/web@${EXPECTED_STRUDEL_VERSION}`;
+  old?.remove();
+  const script = document.createElement('script');
+  script.src = src;
+  script.defer = true;
+  document.head.appendChild(script);
+}
+
 function findContext(obj, seen = new Set(), depth = 0) {
   if (!obj || depth > 4 || seen.has(obj)) return null;
   seen.add(obj);
@@ -161,6 +173,7 @@ export function useStrudel() {
   const [initializing, setInitializing] = useState(true);
   const [error, setError] = useState(null);
   const [audioReady, setAudioReady] = useState(false);
+  const [attempt, setAttempt] = useState(0);
   const replRef = useRef(null);
   const audioRef = useRef({
     ctx: null,
@@ -222,7 +235,10 @@ export function useStrudel() {
     let cancelled = false;
     const audioState = audioRef;
     async function init() {
+      setInitializing(true);
+      setError(null);
       try {
+        if (attempt > 0) reloadStrudelScript();
         const strudelScript = /** @type {HTMLScriptElement | null} */ (
           document.querySelector('script[src*="@strudel/web@"]')
         );
@@ -258,24 +274,14 @@ export function useStrudel() {
         setReady(true);
       } catch (e) {
         if (!cancelled) {
-          // Graceful fallback for environments where Strudel bootstrapping fails (notably WebKit).
-          try {
-            const Ctx = window.AudioContext || window.webkitAudioContext;
-            if (Ctx && !audioRef.current.ctx) {
-              audioRef.current.ctx = new Ctx();
-              setAudioReady(true);
-            }
-          } catch {
-            // noop
-          }
-          replRef.current = {
-            evaluate: async () => {},
-            stop: () => {},
-            hush: () => {},
-          };
-          console.warn(`[SynthReel] Strudel init failed, using fallback engine: ${e?.message || e}`);
-          setError(null);
-          setReady(true);
+          /* Do not pretend to be ready: a silent no-op engine used to report
+             ENGINE READY while every PLAY did nothing. Surface the failure so
+             the UI can show it and offer a retry. */
+          replRef.current = null;
+          const message = e?.message || String(e);
+          console.warn(`[SynthReel] Strudel init failed: ${message}`);
+          setError(message);
+          setReady(false);
         }
       } finally {
         if (!cancelled) setInitializing(false);
@@ -285,8 +291,12 @@ export function useStrudel() {
     return () => {
       cancelled = true;
       audioState.current.restoreConnect?.();
+      audioState.current.tapInstalled = false;
     };
-  }, [wireAudio]);
+  }, [wireAudio, attempt]);
+
+  /** Re-run engine initialisation after a failure (e.g. the CDN was unreachable). */
+  const retry = useCallback(() => setAttempt((n) => n + 1), []);
 
   const play = useCallback(
     async (code) => {
@@ -611,6 +621,7 @@ export function useStrudel() {
     ready,
     initializing,
     error,
+    retry,
     audioReady,
     play,
     stop,
