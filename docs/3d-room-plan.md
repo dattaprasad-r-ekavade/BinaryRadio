@@ -39,7 +39,7 @@ The shop fits the existing features well:
 | RJ radio mode | The in-store radio behind the counter |
 | Tune editor and custom tunes | Demo booth computer, *Local Artists* shelf |
 | WAV export | "Dub a copy" on the booth's tape duplicator |
-| Light / dark theme | Shop at night (neon) or daytime (sunlight through the window) |
+| Light / dark theme | The two shop looks: **Cosy Day** (light) and **Neon Night** (dark); see [Visual style](#visual-style-two-looks-one-shop) |
 | Engine status | The OPEN / CLOSED sign on the door |
 
 The hard parts are art (modelled, lightweight 3D assets), performance on
@@ -59,6 +59,94 @@ phones, and accessibility. None of them block the project; they shape it.
 Load the 3D view as a separate chunk (`lazy(() => import('./scene/Shop'))`)
 so the 2D app and people who choose it never download three.js
 (about 150–200 kB gzipped with R3F and drei).
+
+## Visual style: two looks, one shop
+
+The shop has two looks, switched like light and dark mode:
+
+| | **Cosy Day** (light) | **Neon Night** (dark) |
+| --- | --- | --- |
+| Preview style | F, hand-painted cosy | B, neon synthwave |
+| Feeling | A warm, sunny afternoon in a family-run shop | Late night in the city, rain outside, the shop glowing |
+| Light | Low sun through the window, warm bounce light, soft shadows | Neon sign, LED strips on shelves and counter, coloured point lights (pink, cyan, violet) |
+| Surfaces | Painted textures with visible brush strokes, matte wood, paper signs | Dark walls, glossy wet-look floor, emissive signs and buttons |
+| Window | Blue sky, pale buildings | Night city with lit windows and rain streaks |
+| Shop sign | Painted wooden sign | Glass neon tube sign that flickers on |
+| Section cards | Hand-lettered paper cards | Neon-outlined acrylic cards |
+| Post effects | Gentle vignette and warm colour grade only | Bloom, film grain, optional chromatic edge and haze (see quality tiers) |
+| Maps to | `data-theme="light"` | `data-theme="dark"` |
+
+### How the toggle works
+
+- **One set of models.** Both looks share every mesh, UV layout and
+  camera viewpoint. A "look" is a bundle of materials, lighting, lightmaps,
+  sky/window texture and post-processing settings
+  (`src/scene/looks/cosyDay.js`, `src/scene/looks/neonNight.js`).
+- **Same switch as the theme.** The existing theme setting (`T` key and the
+  header button) picks the look, so the 2D app and the shop always agree. The
+  first visit follows the system light / dark preference.
+- **In the shop, the switch is a light switch** on the wall by the door. Flipping it
+  plays a 1–2 s transition: the sun fades, the neon tubes flicker on one by
+  one, rain starts on the window. Reverse for day. With
+  `prefers-reduced-motion`, use a short crossfade instead.
+- **Only the active look downloads.** Each look has its own baked lightmaps
+  and some textures (about 1–1.5 MB each). Load the current look first and
+  load the other in the background once the shop is idle, so the switch is
+  instant without slowing the first visit.
+
+### Neon Night quality tiers
+
+Neon Night is the graphics-heavy look. It scales by device, chosen
+automatically by `PerformanceMonitor` and adjustable in a settings menu:
+
+| Tier | What's on | Target |
+| --- | --- | --- |
+| **Ultra** | Everything in High, plus real-time screen-space reflections on the floor, volumetric haze in the neon light, rain drops running down the window, depth of field at viewpoints | Desktop GPUs |
+| **High** | Bloom, reflective floor (planar reflection at half resolution), film grain, chromatic edge, animated neon flicker, rain particles outside | Laptops, recent phones |
+| **Medium** | Bloom at quarter resolution; floor uses a pre-rendered reflection texture; no haze | Most phones |
+| **Low** | No post-processing; emissive materials give the glow; static rain texture | Older phones |
+
+Cosy Day has no heavy effects, so it needs only one tier. If a device
+can't keep 30 fps even on Neon Night Low, suggest Cosy Day or Classic view.
+
+### Shared rules for both looks
+
+- **Shapes:** stylised, slightly chunky proportions (rounded edges, thick
+  shelves, oversized cassettes so labels can be read from the counter). No
+  photoreal detail.
+- **Cassettes:** labels stay readable in both looks. Insert and spine
+  textures are generated at runtime from track data, with a separate
+  emissive mask for Neon Night (title and accent stripe glow faintly).
+- **Fonts:** Space Mono for labels and the 2D overlay (already in the app);
+  one original display font for signs (a script for neon, a brush serif for
+  painted signs).
+- **Colour:** each tape keeps its `color` and `accent` from the manifest in
+  both looks. Neon Night palette: deep violet `#140c26`, hot pink `#ff2fb4`,
+  cyan `#22e6ff`, violet `#8a5cff`, amber `#ffcf6b`. Cosy Day palette: warm
+  plaster `#f1dcb8`, oak `#a8703f`, sage `#7fa07a`, brick red `#c8553d`,
+  cream `#fff4dc`.
+- **Overlay UI:** follows the active look. Day uses paper-and-ink panels;
+  night uses dark glass panels with a neon outline. Both reuse the existing
+  design tokens in `src/styles/variables.css`, with two added theme sets.
+- **Contrast:** both looks keep the existing WCAG AA contrast test for all
+  overlay text.
+
+### Assets to prepare before building
+
+| Asset | Shared | Cosy Day | Neon Night |
+| --- | --- | --- | --- |
+| Shop shell (walls, floor, ceiling, door, window frame) | Model + UVs | Painted wall/floor textures, lightmap | Dark textures, gloss map for floor, lightmap |
+| Shelving, bins, counter, booth | Models | Painted wood textures | Dark wood, LED strip meshes |
+| Cassette case | One model | Runtime texture | Runtime texture + emissive mask |
+| Deck, CRT computer, radio, keyboard, headphones, duplicator | Models with separate button / knob / reel / needle parts | Matte materials | Emissive LEDs, glowing VU backlight |
+| Shop sign | Two meshes (painted board, neon tubes) | Painted board | Neon tubes + flicker animation |
+| Posters, flyers (original art) | 6–8 designs | Painted versions | Same art, darker print + glow frame |
+| Window / street | Plane or simple street geometry | Day sky texture | Night sky, lit windows, rain |
+| Sounds | Door bell, cassette clicks, deck buttons | Street ambience (birds, distant traffic) | Rain, neon hum, distant traffic |
+
+The style previews used to pick these looks (styles A–F) were quick
+three.js renders of a single shop corner; they set the direction, not the
+final art.
 
 ## Shop layout
 
@@ -230,8 +318,8 @@ own tape". It holds the keyboard, a computer and a tape duplicator.
 - Rain on the window and a quiet street outside; occasional passing car
   lights. Rain gets heavier when a tape tagged `rain` is playing.
 - Neon and LEDs pulse gently with the music level (the existing analyser).
-- Day / night follows the existing light / dark theme: daytime has sunlight
-  through the window, night has neon.
+- Day / night is the look toggle (see [Visual style](#visual-style-two-looks-one-shop)):
+  Cosy Day has sunlight through the window, Neon Night has rain and neon.
 - Posters, shop signs, flyers and the shop's own brand are **original artwork
   only**: no copies of real album covers, record labels, shop chains, games
   or brands.
@@ -260,10 +348,10 @@ own tape". It holds the keyboard, a computer and a tape duplicator.
 
 | Target | Budget |
 | --- | --- |
-| Initial 3D download (models + textures, compressed) | ≤ 4 MB; booth detail loaded on first visit |
+| Initial 3D download (models + textures, compressed) | ≤ 4 MB for the active look; the other look loads in the background (about 1–1.5 MB) |
 | Draw calls | ≤ 150 (instance all cassettes, merge static shelving) |
 | Triangles | ≤ 350k |
-| Frame rate | 60 fps on a mid-range laptop, ≥ 30 fps on a mid-range phone (device pixel ratio ≤ 1.5) |
+| Frame rate | 60 fps on a mid-range laptop, ≥ 30 fps on a mid-range phone (device pixel ratio ≤ 1.5), using the Neon Night tier the device can sustain |
 | Time to inside the shop | < 3 s on a broadband connection after the click |
 
 Techniques: baked lighting (no real-time shadows except a contact shadow
@@ -287,6 +375,10 @@ src/
     Keyboard3D.jsx
     Computer3D.jsx        // CRT + <Html> TuneEditor
     LabelDesigner.jsx
+    looks/
+      cosyDay.js          // materials, lights, lightmaps, post settings
+      neonNight.js        // same, plus quality tiers
+      useLook.js          // follows the theme setting; runs the switch transition
     useViewpoints.js
     useCassetteTexture.js // runtime insert / spine textures
   audio/
@@ -317,7 +409,7 @@ Manifest additions (all optional, with fallbacks): `addedAt`, `staffPick`,
 | 2. Browsing | Instanced cassettes with runtime inserts, mood shelves, pick-up and inspect, Listen / Hold / Queue actions, load animation, reels and VU needles | 1–1.5 weeks |
 | 3. Demo booth: keyboard | Synth and presets, QWERTY + touch + Web MIDI, scale lock, timing snap, booth deck for playing along | 1 week |
 | 4. Demo booth: recording and release | Jam recorder, 4-track layering, CRT `<Html>` editor, label designer, Local Artists shelf, duplicator (WAV export) | 1.5 weeks |
-| 5. Art pass | Final Blender models, baked lighting, neon and CRT shaders, rain, post effects | 2–3 weeks (most depends on art) |
+| 5. Art pass | Final Blender models, both looks (painted textures and lightmaps for Cosy Day; dark textures, neon and lightmaps for Neon Night), CRT shader, rain, post effects, Neon Night quality tiers, light-switch transition | 3–4 weeks (most depends on art; the second look adds about a week) |
 | 6. Storefront and polish | Street intro, OPEN/CLOSED sign, in-store radio with positional DJ voice, headphones toggle, performance tuning, a11y pass, e2e smoke test | 1 week |
 | 7. Extras | Share links into the window display, bargain-bin generative tapes, free-walk mode, a second deck for DJ mixing | open-ended |
 
@@ -327,6 +419,10 @@ Classic/Shop toggle.
 
 ## Risks
 
+- **Two looks double the texture and lighting work.** Mitigation: both looks
+  share every model and UV layout, so only textures, lightmaps and lighting
+  differ. Build the greybox and phases 1–4 with one look, and add the second
+  in the art pass.
 - **Art takes the most time,** and a shop has more objects than a single
   room. Mitigation: begin with stylised low-poly models and flat colours
   (which also suits the 80s look); cassettes are one instanced model with
