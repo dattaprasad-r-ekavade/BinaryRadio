@@ -4,7 +4,7 @@ import { useFrame } from '@react-three/fiber'
 import { useCursor } from '@react-three/drei'
 import * as THREE from 'three'
 import { SHELF, CASSETTE, BIN } from './shopLayout'
-import { groupTracksByMood, bargainBinTracks } from '../utils/shelving'
+import { groupTracksIntoSections, bargainBinTracks } from '../utils/shelving'
 import { useCassetteTexture } from './useCassetteTexture'
 
 const NO_TRACKS = []
@@ -316,7 +316,7 @@ function Cassette({ track, look, base, bin = false, pulled = false, loaded = fal
 
 /** The shelf unit, the mood sections and the bargain bin, with their tapes. */
 export default function Shelves({ look, tracks = NO_TRACKS, favorites = NO_IDS, loadedId, pickedId, onPick, onHover }) {
-  const sections = useMemo(() => groupTracksByMood(tracks, 3), [tracks])
+  const sections = useMemo(() => groupTracksIntoSections(tracks), [tracks])
   const shelfItems = useMemo(() => layoutShelf(sections), [sections])
   const binTracks = useMemo(() => bargainBinTracks(tracks, 8), [tracks])
   const favouriteIds = useMemo(() => new Set(favorites), [favorites])

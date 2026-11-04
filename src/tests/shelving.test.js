@@ -125,3 +125,33 @@ describe('bargainBinTracks', () => {
     expect(tracks).toEqual(copy)
   })
 })
+
+describe('groupTracksIntoSections', () => {
+  it('files every manifest tape in a section that matches one of its moods', async () => {
+    const { default: manifest } = await import('../../public/tunes/manifest.json')
+    const { groupTracksIntoSections, SHOP_SECTIONS } = await import('../utils/shelving')
+    const sections = groupTracksIntoSections(manifest)
+    expect(sections.map((s) => s.label)).toEqual(SHOP_SECTIONS.map((s) => s.label))
+    expect(sections.reduce((n, s) => n + s.tracks.length, 0)).toBe(manifest.length)
+    sections.forEach((section, i) => {
+      const allowed = new Set(SHOP_SECTIONS[i].tags)
+      for (const t of section.tracks) expect(t.moodTags.some((m) => allowed.has(m))).toBe(true)
+    })
+    const where = (id) => sections.find((s) => s.tracks.some((t) => t.id === id))?.label
+    expect(where('gentle-focus')).toBe('AMBIENT')
+    expect(where('midnight-drive')).toBe('NIGHT & BEATS')
+    expect(where('monsoon')).toBe('WORLD')
+    expect(where('moonlit-local')).toBe('WORLD')
+    expect(where('lantern-procession')).toBe('WORLD')
+  })
+
+  it('puts tapes with unknown moods in the smallest section', async () => {
+    const { groupTracksIntoSections } = await import('../utils/shelving')
+    const sections = groupTracksIntoSections([
+      { id: 'a', moodTags: ['ambient'] },
+      { id: 'b', moodTags: ['synthwave'] },
+      { id: 'c', moodTags: ['mystery'] },
+    ])
+    expect(sections.find((s) => s.tracks.some((t) => t.id === 'c'))?.label).toBe('WORLD')
+  })
+})

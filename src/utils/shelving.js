@@ -91,3 +91,54 @@ export function bargainBinTracks(tracks, count = 8, seed = 1) {
   }
   return picked
 }
+
+/**
+ * The shop's fixed shelf sections, left to right. A tape goes in the first
+ * section (in `priority` order) that shares one of its mood tags, so e.g. a
+ * rainy raga lands in WORLD, not AMBIENT.
+ */
+export const SHOP_SECTIONS = [
+  {
+    tag: 'ambient',
+    label: 'AMBIENT',
+    priority: 2,
+    tags: ['ambient', 'focus', 'rain', 'meditative', 'deep', 'cosmic', 'warm', 'acoustic', 'calm', 'sleep'],
+  },
+  {
+    tag: 'night',
+    label: 'NIGHT & BEATS',
+    priority: 3,
+    tags: ['synthwave', 'night', 'chiptune', 'lofi', 'industrial', 'dub', 'glitch', 'urban', 'techno', 'house', 'beats'],
+  },
+  {
+    tag: 'world',
+    label: 'WORLD',
+    priority: 1,
+    tags: ['raga', 'gamelan', 'slendro', 'goa', 'sitar', 'bhairav', 'world'],
+  },
+]
+
+/**
+ * Put every track in one of `sections` by its mood tags (see SHOP_SECTIONS).
+ * Tracks matching no section go to the section with the fewest tracks, so
+ * nothing is dropped. Returns `[{ tag, label, tracks }]` in display order.
+ */
+export function groupTracksIntoSections(tracks, sections = SHOP_SECTIONS) {
+  const out = sections.map((s) => ({ tag: s.tag, label: s.label, tracks: /** @type {any[]} */ ([]) }))
+  const byPriority = sections
+    .map((s, i) => ({ i, priority: s.priority ?? i, tags: new Set(s.tags.map((t) => t.toLowerCase())) }))
+    .sort((a, b) => a.priority - b.priority)
+  const unmatched = []
+  for (const track of tracks || []) {
+    const tags = (track?.moodTags || []).map((t) => String(t).toLowerCase())
+    const hit = byPriority.find((s) => tags.some((t) => s.tags.has(t)))
+    if (hit) out[hit.i].tracks.push(track)
+    else unmatched.push(track)
+  }
+  for (const track of unmatched) {
+    let smallest = 0
+    for (let i = 1; i < out.length; i++) if (out[i].tracks.length < out[smallest].tracks.length) smallest = i
+    out[smallest].tracks.push(track)
+  }
+  return out
+}
