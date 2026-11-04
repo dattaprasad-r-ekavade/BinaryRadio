@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useReducer } from 'react'
+import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react'
 import { useStrudel } from './useStrudel'
 import { useRadioMode } from './useRadioMode'
 import { useKeyboardShortcuts } from './useKeyboardShortcuts'
@@ -57,6 +57,7 @@ export function useTransport({
     ready,
     initializing,
     error,
+    retry: retryEngine,
     audioReady,
     play,
     stop,
@@ -245,16 +246,47 @@ export function useTransport({
     if (state.deckState === 'playing') setCps(state.cps)
   }, [setCps, state.cps, state.deckState])
 
+  /* End of a tape (its durationSec has elapsed) outside radio mode:
+     - something is queued  -> play the next queued tape. The queue is an
+       explicit "play this next", so it wins over LOOP (which used to block
+       auto-advance entirely, and LOOP is on by default).
+     - nothing queued, LOOP on  -> keep playing the current tape.
+     - nothing queued, LOOP off -> stop. */
+  const hasQueue = queueIds.length > 0
+  const advanceRef = useRef({ playNextFromQueue, handleLoadAndPlay, handleStop })
+  advanceRef.current = { playNextFromQueue, handleLoadAndPlay, handleStop }
+  // When the current tape started playing, so queue edits don't restart the clock.
+  const tapeStartRef = useRef({ id: null, at: 0 })
+  const loadedId = state.loadedTrack?.id ?? null
+  const durationSec = state.loadedTrack?.durationSec || 180
   useEffect(() => {
-    if (state.deckState !== 'playing' || radio.enabled || !queueIds.length) return undefined
-    const ms = (state.loadedTrack?.durationSec || 180) * 1000
+    if (state.deckState !== 'playing') {
+      // Stop/pause restarts the pattern from the top on the next PLAY.
+      tapeStartRef.current = { id: null, at: 0 }
+      return
+    }
+    if (tapeStartRef.current.id !== loadedId) tapeStartRef.current = { id: loadedId, at: Date.now() }
+  }, [loadedId, state.deckState])
+
+  useEffect(() => {
+    if (state.deckState !== 'playing' || radio.enabled) return undefined
+    if (!hasQueue && state.looping) return undefined
+    const startedAt = tapeStartRef.current.id === loadedId ? tapeStartRef.current.at : Date.now()
+    const ms = Math.max(0, startedAt + durationSec * 1000 - Date.now())
+    const looping = state.looping
     const t = setTimeout(() => {
-      if (!state.looping) {
-        void playNextFromQueue(handleLoadAndPlay)
+      const { playNextFromQueue: next, handleLoadAndPlay: loadAndPlay, handleStop: stopNow } =
+        advanceRef.current
+      if (!hasQueue) {
+        stopNow()
+        return
       }
+      void next(loadAndPlay).then((played) => {
+        if (!played && !looping) stopNow()
+      })
     }, ms)
     return () => clearTimeout(t)
-  }, [handleLoadAndPlay, playNextFromQueue, queueIds.length, radio.enabled, state.deckState, state.loadedTrack?.durationSec, state.looping])
+  }, [durationSec, hasQueue, loadedId, radio.enabled, state.deckState, state.looping])
 
   const handleExport = wavExport.exportWav
 
@@ -310,7 +342,7 @@ export function useTransport({
   }, [radio])
 
   const engineState = initializing ? 'wait' : error ? 'err' : ready ? 'ok' : 'wait'
-  const engineLabel = initializing ? 'LOADING…' : error ? 'ENGINE ERROR' : ready ? 'ENGINE READY' : 'OFFLINE'
+  const engineLabel = initializing ? 'LOADING…' : error ? 'ENGINE OFFLINE' : ready ? 'ENGINE READY' : 'OFFLINE'
 
   const resolvedTheme = resolveTheme()
 
@@ -330,6 +362,7 @@ export function useTransport({
     radio,
     engineState,
     engineLabel,
+    engineError: error,
     actions: {
       setRjVolume: (v) => setField('rjVolume', v),
       setVisualMode: (v) => setField('visualMode', v),
@@ -346,6 +379,7 @@ export function useTransport({
       setShowEditor: (v) => setField('showEditor', v),
       setShowShortcuts: (v) => setField('showShortcuts', v),
       install: pwaInstall.handleInstall,
+      retryEngine,
       setDraftTune: drafts.setDraftTune,
       saveDraftTune: drafts.saveDraftTune,
       playDraftTune: drafts.playDraftTune,
