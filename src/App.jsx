@@ -80,10 +80,18 @@ export default function App() {
               Install
             </button>
           )}
-          <div className={`eng eng--${ui.engineState}`}>
+          <div
+            className={`eng eng--${ui.engineState}`}
+            title={ui.engineError ? `Audio engine failed to load: ${ui.engineError}` : undefined}
+          >
             <span className="eng-led" />
             <span className="eng-txt">{ui.engineLabel}</span>
           </div>
+          {ui.engineState === 'err' && (
+            <button type="button" className="mini-btn" onClick={ui.actions.retryEngine}>
+              Retry
+            </button>
+          )}
         </div>
       </header>
 
@@ -152,6 +160,13 @@ export default function App() {
 
       {/* Moved above the deck: as a message *below* the transport it appeared
           after the controls it was describing, and shifted the layout. */}
+      {ui.engineState === 'err' && (
+        <div className="app-msg app-msg--err" role="alert">
+          The audio engine could not load, so tapes cannot play. Check your connection (it loads
+          from unpkg.com) and press Retry.
+        </div>
+      )}
+
       {transport.msg && (
         <div className={`app-msg app-msg--${transport.msg.type}`} role="status">
           {transport.msg.text}
