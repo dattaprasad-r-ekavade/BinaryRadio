@@ -62,11 +62,12 @@ so the 2D app and people who choose it never download three.js
 
 ## Visual style: two looks, one shop
 
-The shop has two looks, switched like light and dark mode:
+The shop has exactly **two looks**, switched like light and dark mode. These
+are the only visual styles planned; no other style is in scope.
 
 | | **Cosy Day** (light) | **Neon Night** (dark) |
 | --- | --- | --- |
-| Preview style | F, hand-painted cosy | B, neon synthwave |
+| Style | Hand-painted cosy | Neon synthwave |
 | Feeling | A warm, sunny afternoon in a family-run shop | Late night in the city, rain outside, the shop glowing |
 | Light | Low sun through the window, warm bounce light, soft shadows | Neon sign, LED strips on shelves and counter, coloured point lights (pink, cyan, violet) |
 | Surfaces | Painted textures with visible brush strokes, matte wood, paper signs | Dark walls, glossy wet-look floor, emissive signs and buttons |
@@ -157,9 +158,8 @@ can't keep 30 fps even on Neon Night Low, suggest Cosy Day or Classic view.
 | Window / street | Plane or simple street geometry | Day sky texture | Night sky, lit windows, rain |
 | Sounds | Door bell, cassette clicks, deck buttons | Street ambience (birds, distant traffic) | Rain, neon hum, distant traffic |
 
-The style previews used to pick these looks (styles A–F) were quick
-three.js renders of a single shop corner; they set the direction, not the
-final art.
+The preview renders of a single shop corner in these two looks were quick
+three.js sketches; they set the direction, not the final art.
 
 ## Shop layout
 
@@ -437,8 +437,8 @@ Classic/Shop toggle.
   differ. Build the greybox and phases 1–4 with one look, and add the second
   in the art pass.
 - **Art takes the most time,** and a shop has more objects than a single
-  room. Mitigation: begin with stylised low-poly models and flat colours
-  (which also suits the 80s look); cassettes are one instanced model with
+  room. Mitigation: build phases 1–4 with simple placeholder
+  shapes and add the final hand-painted and neon art in phase 5; cassettes are one instanced model with
   generated textures, so the tape count doesn't add art work.
 - **Mobile performance and battery,** especially rain and neon. Mitigation:
   performance budget above; `PerformanceMonitor` turns off rain and post
